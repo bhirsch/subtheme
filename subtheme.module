@@ -1,0 +1,42 @@
+<?php
+// $Id $
+
+/**
+ * @file
+ * subtheme.module provides users a settings page for creating a subtheme. 
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function subtheme_menu() {
+  $items = array();
+
+  $items['admin/settings/subtheme'] = array(
+    'title' => t('Subtheme Module Settings'), 
+    'description' => t('Configure subtheme module'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('subtheme_admin_settings'),
+    'access arguments' => array('administer subtheme'), 
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'subtheme.admin.inc', 
+  );
+  $items['admin/subtheme'] = array(
+    'title' => t('Subtheme Settings'), 
+    'description' => t('Configure Subtheme'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('subtheme_form'),
+    'access arguments' => array('manage subtheme'), 
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'subtheme.form.inc', 
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function subtheme_perm() {
+  return array('administer subtheme', 'manage subtheme');
+}

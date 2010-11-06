@@ -1,0 +1,14 @@
+<?php
+/**
+ * @file subtheme.install
+ */
+
+/**
+ * hook_install()
+ * 
+ * set weight of this module to 10, so its submit function will run 
+ * after other modules that are modifying the subtheme form.
+ */
+function subtheme_install() {
+  db_query("UPDATE {system} SET weight = 10 WHERE name = 'subtheme'");
+}
