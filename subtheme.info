@@ -3,4 +3,4 @@ name = Subtheme
 description = GUI for creating a subtheme. 
 core = 6.x
 version = "6.x-0.0"
-project = "Stars with Stripes"
+project = "Subtheme"
