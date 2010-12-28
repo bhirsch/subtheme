@@ -1,0 +1,6 @@
+; $Id $
+name = HTML Elements
+description = Expose basic HTML elements in Subtheme form.
+core = 6.x
+version = "6.x-1.0"
+project = "Subtheme"
