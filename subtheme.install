@@ -12,7 +12,7 @@
 function subtheme_install() {
   // following naming convention $schema['mymodule_myobj'],
   // see help/ctools/export
-  drupal_install_schema('subtheme_subtheme');
+  drupal_install_schema('subtheme');
   db_query("UPDATE {system} SET weight = 10 WHERE name = 'subtheme'");
 }
 
@@ -20,7 +20,7 @@ function subtheme_install() {
  * Implementation of hook_uninstall().
  */
 function subtheme_uninstall() {
-  drupal_uninstall_schema('subtheme_subtheme');
+  drupal_uninstall_schema('subtheme');
 }
 
 /**
@@ -46,55 +46,54 @@ function subtheme_schema() {
       // 'key in table' => 'my_join_table',
     ),
     'fields' => array(
-      'name' => array(
-        'type' => 'varchar',
-        'length' => '64',
-        'description' => t('Unique ID for subtheme object. Used to identify '
-                          .'subthemes programmatically.'),
-      ),
       'sid' => array(
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'description' => t('Primary ID field for the subtheme_subtheme table. Not used for anything except internal lookups.'),
+        'description' => 'Primary ID field for the subtheme_subtheme table. '
+                        .'Not used for anything except internal lookups.',
         'no export' => TRUE, // Do not export database-only keys.
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => '32',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Unique ID for subtheme object. Used to identify '
+                          .'subthemes programmatically.',
       ),
       'title' => array(
         'type' => 'varchar',
-        'length' => '64',
-        'description' => t('Human readable name.'),
+        'length' => '32',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Human readable name.',
       ),
       'description' => array(
         'type' => 'varchar',
         'length' => '255',
-        'description' => t('Description of subtheme.'),
+        'default' => '',
+        'description' => 'Description of subtheme.',
       ),
-      'form' => array(
+     'form' => array(
         'type' => 'text',
         'size' => 'big',
         'description' => t('A serialized form array.'),
+        'not null' => TRUE,
         'serialize' => TRUE,
         'serialized default' => 'a:0:{}',
       ),
       'is_active' => array(
         'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
+        'default' => 0,
         'description' => t('0 not active. 1 active.'),
       ),
-      'primary key' => array('sid'),
-      'unique keys' => array(
-        'name' => array('name'),
-      ),
-    )
+    ),
+    'primary key' => array('sid'),
+    'unique keys' => array('name' => array('name')), 
   );
 
   return $schema;
 }
 
-/**
- * Implementation of hook_update_N.
- */
-function subtheme_update_6001() {
-  db_query("UPDATE {system} SET weight = 1 WHERE name = 'subtheme' ");
-}
+
