@@ -12,6 +12,7 @@
 function subtheme_menu() {
   $items = array();
 
+  /*
   $items['admin/settings/subtheme'] = array(
     'title' => t('Subtheme Module Settings'), 
     'description' => t('Configure subtheme module'),
@@ -21,14 +22,23 @@ function subtheme_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'subtheme.admin.inc', 
   );
-  $items['admin/subtheme'] = array(
-    'title' => t('Subtheme Settings'), 
-    'description' => t('Configure Subtheme'),
+  // */
+  $items['admin/build/subtheme'] = array(
+    'title' => t('Subtheme Module Settings'), 
+    'description' => t('Choose a subtheme'),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('subtheme_form'),
+    'page arguments' => array('subtheme_subthemes'),
     'access arguments' => array('manage subtheme'), 
     'type' => MENU_NORMAL_ITEM,
-    'file' => 'subtheme.form.inc', 
+    'file' => 'subtheme.activate.inc', 
+  );
+  $items['admin/build/subtheme/edit/%'] = array(
+    'title' => t('Subtheme Settings ADD HUMAN READABLE TITLE HERE'), 
+    'description' => t('Configure Subtheme'),
+    'page callback' => 'subtheme_edit_page',
+    'access arguments' => array('manage subtheme'), 
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'subtheme.edit.inc', 
   );
 
   return $items;
