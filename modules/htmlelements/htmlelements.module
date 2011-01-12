@@ -48,6 +48,37 @@ function htmlelements_form_alter(&$form, &$form_state, $form_id) {
       '#default_value' => variable_get('subtheme_element--p_line-height', NULL ),
       '#description' => t(''),
     );
+    // <div> 
+    $form['htmlelements']['div'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('div'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $form['htmlelements']['div']['subtheme_element--div_font-family'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Font Family'),
+      '#default_value' => variable_get('subtheme_element--div_font-family', NULL ),
+      '#description' => t(''),
+    );
+    $form['htmlelements']['div']['subtheme_element--div_font-size'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Font Size'),
+      '#default_value' => variable_get('subtheme_element--div_font-size', NULL ),
+      '#description' => t(''),
+    );
+    $form['htmlelements']['div']['subtheme_element--div_font-weight'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Font Weight'),
+      '#default_value' => variable_get('subtheme_element--div_font-weight', NULL ),
+      '#description' => t(''),
+    );
+    $form['htmlelements']['div']['subtheme_element--div_line-height'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Line Height'),
+      '#default_value' => variable_get('subtheme_element--div_line-height', NULL ),
+      '#description' => t(''),
+    );
   }
 }
 
