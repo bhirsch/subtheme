@@ -50,6 +50,118 @@ function subtheme_perm() {
   return array('administer subtheme', 'manage subtheme', 'subtheme export');
 }
 
+//-------------------------------------------//
+// Subtheme                                  //
+//-------------------------------------------//
+
+/**
+ * @param $name
+ *  string, subtheme name.
+ */
+function subtheme_get($name) {
+  ctools_include('export');
+  return subtheme_subtheme_load($name);
+}
+
+/**
+ * @param $subtheme
+ *  Subtheme object.
+ */
+function subtheme_set($subtheme) {
+  subtheme_subtheme_save($name);
+}
+
+/**
+ *
+ */
+function subtheme_admin_options_get($name) {}
+
+/**
+ *
+ */
+function subtheme_admin_options_set($name) {}
+
+
+//--------------------------------------------------/
+// Ctools plugin                                    /
+//--------------------------------------------------/
+/**
+ * Implmenentation of hook_ctools_plugin_directory.
+ */
+function subtheme_ctools_plugin_directory($module, $plugin) {
+  if ($plugin == 'export_ui') {
+    return 'plugins/'. $plugin;
+  }
+}
+
+/**
+* Implementation of hook_ctools_plugin_api().
+*
+* Tell CTools that we support the default_mymodule_presets API.
+*/
+function subtheme_ctools_plugin_api($owner, $api) {
+  if ($owner == 'subtheme' && $api == 'default_subtheme_subtheme') {
+    return array('version' => 1);
+  }
+}
+
+//--------------------------------------------------/
+// Ctools export hooks                              /
+//--------------------------------------------------/
+
+/**
+ * Export a myobj and display it in a form.
+ * 
+ * @param $name
+ *  string, unique id for object
+ */
+function subtheme_export_subtheme(&$form_state, $name) {
+  ctools_include('export');
+  $obj = subtheme_subtheme_load($name);
+  drupal_set_title(check_plain($obj->description));
+  $code = subtheme_subtheme_export($obj);
+  $lines = substr_count($code, "\n");
+
+  $form['export'] = array(
+    '#title' => t('Export data'),
+    '#type' => 'textarea',
+    '#value' => $code,
+    '#rows' => $lines,
+    '#description' => t('Copy the export text and paste it into another myobj using the import function.'),
+  );
+  return $form;
+}
+
+/**
+ * Load a single myobj.
+ */
+function subtheme_subtheme_load($name) {
+  ctools_include('export');
+  $result = ctools_export_load_object('subtheme_subtheme', 'names', array($name)); 
+  if (isset($result[$name])) {
+    return $result[$name];
+  }
+}
+
+/**
+ * Export a myobj.
+ */
+function subtheme_subtheme_export($obj, $indent = '') {
+  ctools_include('export');
+  $output = ctools_export_object('subtheme_subtheme', $obj, $indent);
+  return $output;
+}
+
+/**
+ * Save a single myobj.
+ */
+// TODO 
+function subtheme_subtheme_save(&$myobj) {
+    $update = (isset($myobj->oid) && is_numeric($myobj->oid)) ? array('oid') : array();
+      return drupal_write_record('myobj', $myobj, $update);
+}
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////
 // COPIED FROM MTHEME MODULE BELOW
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -95,7 +207,7 @@ function subtheme_form_alter(&$form, &$form_state, $form_id) {
 // */
 
 //----------------------------------------------//
-// subtheme                                       //
+// mtheme                                       //
 //----------------------------------------------//
 
 /**
@@ -219,85 +331,6 @@ function subtheme_get_groups($subthemes = NULL) {
   } else {
     return FALSE;
   }
-}
-
-//--------------------------------------------------/
-// Ctools plugin                                    /
-//--------------------------------------------------/
-/**
- * Implmenentation of hook_ctools_plugin_directory.
- */
-function subtheme_ctools_plugin_directory($module, $plugin) {
-  if ($plugin == 'export_ui') {
-    return 'plugins/'. $plugin;
-  }
-}
-
-/**
-* Implementation of hook_ctools_plugin_api().
-*
-* Tell CTools that we support the default_mymodule_presets API.
-*/
-function subtheme_ctools_plugin_api($owner, $api) {
-  if ($owner == 'subtheme' && $api == 'default_subtheme_subtheme') {
-    return array('version' => 1);
-  }
-}
-
-//--------------------------------------------------/
-// Ctools export hooks                              /
-//--------------------------------------------------/
-
-/**
- * Export a myobj and display it in a form.
- * 
- * @param $name
- *  string, unique id for object
- */
-function subtheme_export_subtheme(&$form_state, $name) {
-  ctools_include('export');
-  $obj = subtheme_subtheme_load($name);
-  drupal_set_title(check_plain($obj->description));
-  $code = subtheme_subtheme_export($obj);
-  $lines = substr_count($code, "\n");
-
-  $form['export'] = array(
-    '#title' => t('Export data'),
-    '#type' => 'textarea',
-    '#value' => $code,
-    '#rows' => $lines,
-    '#description' => t('Copy the export text and paste it into another myobj using the import function.'),
-  );
-  return $form;
-}
-
-/**
- * Load a single myobj.
- */
-function subtheme_subtheme_load($name) {
-  ctools_include('export');
-  $result = ctools_export_load_object('subtheme_subtheme', 'names', array($name)); 
-  if (isset($result[$name])) {
-    return $result[$name];
-  }
-}
-
-/**
- * Export a myobj.
- */
-function subtheme_subtheme_export($obj, $indent = '') {
-  ctools_include('export');
-  $output = ctools_export_object('subtheme_subtheme', $obj, $indent);
-  return $output;
-}
-
-/**
- * Save a single myobj.
- */
-// TODO 
-function subtheme_subtheme_save(&$myobj) {
-    $update = (isset($myobj->oid) && is_numeric($myobj->oid)) ? array('oid') : array();
-      return drupal_write_record('myobj', $myobj, $update);
 }
 
 
