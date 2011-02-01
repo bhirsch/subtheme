@@ -142,6 +142,7 @@ function subtheme_ctools_export_ui_form(&$form, &$form_state) {
         '#type' => 'textfield',
         '#title' => $options[$selector],
         '#default_value' => $group, 
+        '#required' => TRUE,
       );
     } 
   } else {
@@ -196,8 +197,12 @@ function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state)
         // New selector being added to existing subtheme.
         $processed_selectors[$selector_name] = mtheme_selector_load($selector_name);
       }
-    // Process groups
-    $processed_groups[$selector_name] = $form_state['values'][$selector_name];
+      // Process groups
+      if ($include) {
+        $processed_groups[$selector_name] = $form_state['values'][$selector_name];
+      } else {
+        unset($processed_groups[$selector_name]);
+      }
     }
   }
 

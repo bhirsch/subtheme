@@ -15,11 +15,65 @@
  *  object, $subtheme 
  */
 function subtheme_css($subtheme) {
-//  $css = subtheme_generate_css($selector);   
-//  $written = subtheme_write_css($css);
+  $css = subtheme_generate_css($subtheme);   
+  $written = subtheme_write_css($css);
   if (!$written) {
     // TODO handle error here. Notify user.  
   }
 }
 
+/**
+ * Generate CSS for a subtheme.
+ *
+ * @param $selector
+ *  object, new / updated subtheme.
+ *
+ * @return $css
+ *  Array, array('name' => $name, 'css' => $css);
+ *
+ */
+function subtheme_generate_css($subtheme) {
+  $css = _mtheme_start_css(); // @todo Move css-writing helper functions into own module.
+  $groups = $subtheme->grps;
+  asort($groups);
+  foreach ($groups as $selector_name => $group) {
+    $selector = $subtheme->selectors[$selector_name];
+    $css = _mtheme_group_comment($css, $group); // @todo move func to css module.
+    $css = _mtheme_write_selector_css($css, $selector); 
+  }
 
+  return array('name' => $subtheme->name, 'css' => $css); 
+}
+
+/**
+ * Write CSS and store it 
+ * in files/subtheme/subtheme_name/subtheme_name.css.
+ * 
+ * @param $css
+ *  Array. $css = array('name' => $name, 'css' => $css);
+ */ 
+function subtheme_write_css($css) {
+  $file_contents = $css['css'];
+  $name = $css['name'];
+  // Set the location of the mtheme.css file
+  $file_path = file_directory_path() ."/subtheme/$name/$name.css";
+  // If the directory doesn't exist, create it
+  $dir = file_check_directory(dirname($file_path), FILE_CREATE_DIRECTORY);
+  if (!$dir) {
+    $txt = t('The function file_check_directory() failed. Please notify your system administrator.');
+    drupal_set_message($txt, 'error');
+  }
+
+  // Create CSS file.
+  $saved = file_save_data($file_contents, $file_path, FILE_EXISTS_REPLACE);
+  if (!$saved) {
+    $txt = t('The function file_save_data() failed. Please notify your system administrator.'); 
+    drupal_set_message($txt, 'error');
+  }
+
+  // Notify user about new CSS 
+  $txt = t('New CSS file created: !file',
+          array('!file' => l($file_path, $file_path)));
+
+  drupal_set_message($txt);
+}
