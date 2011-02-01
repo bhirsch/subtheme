@@ -21,6 +21,7 @@ function subtheme_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'subtheme.admin.inc', 
   );
+  /*
   $items['admin/subtheme'] = array(
     'title' => t('Subtheme Settings'), 
     'description' => t('Configure Subtheme'),
@@ -30,6 +31,7 @@ function subtheme_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'subtheme.form.inc', 
   );
+  // */
 
   return $items;
 }
