@@ -2,10 +2,6 @@
 /**
  * CTools export UI extending class. Slightly customized for Context.
  *
- * Based on: context/context_ui/export_ui/context_export_ui.class.php.
- * 
- * @todo Figure out why certain group names break the table layout, e.g. try ...
- *  test, test 1 and test2
  */
 class subtheme_export_ui extends ctools_export_ui {
   /*

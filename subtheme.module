@@ -12,6 +12,7 @@
 function subtheme_menu() {
   $items = array();
 
+  // TODO 
   $items['admin/settings/subtheme'] = array(
     'title' => t('Subtheme Module Settings'), 
     'description' => t('Configure subtheme module'),
@@ -28,8 +29,16 @@ function subtheme_menu() {
     'access arguments' => array('subtheme export'),
     'type' => MENU_CALLBACK,
   );
-  /*
   $items['admin/subtheme'] = array(
+    'title' => t('Select a Subtheme'), 
+    'description' => t('Activate a subtheme'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('subtheme_selection_form'),
+    'access arguments' => array('manage subtheme'), 
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'subtheme.form.inc', 
+  );
+  $items['admin/subtheme/%/form1'] = array(
     'title' => t('Subtheme Settings'), 
     'description' => t('Configure Subtheme'),
     'page callback' => 'drupal_get_form',
@@ -38,7 +47,6 @@ function subtheme_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'subtheme.form.inc', 
   );
-  // */
 
   return $items;
 }
@@ -124,6 +132,15 @@ function theme_subtheme_options_details($selector) {
 function subtheme_get($name) {
   ctools_include('export');
   return subtheme_subtheme_load($name);
+}
+
+/**
+ * @return $subthemes
+ *  Objects, subtheme objects.
+ */
+function subtheme_get_subthemes() {
+  ctools_include('export');
+  return ctools_export_load_object('subtheme_subtheme'); 
 }
 
 /**
