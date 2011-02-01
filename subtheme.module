@@ -21,6 +21,13 @@ function subtheme_menu() {
     'type' => MENU_NORMAL_ITEM,
     'file' => 'subtheme.admin.inc', 
   );
+  $items['admin/build/subtheme/%/export'] = array(
+    'title' => 'export',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('subtheme_export_subtheme', 3), // TODO create function
+    'access arguments' => array('subtheme export'),
+    'type' => MENU_CALLBACK,
+  );
   /*
   $items['admin/subtheme'] = array(
     'title' => t('Subtheme Settings'), 
@@ -40,5 +47,388 @@ function subtheme_menu() {
  * Implementation of hook_perm().
  */
 function subtheme_perm() {
-  return array('administer subtheme', 'manage subtheme');
+  return array('administer subtheme', 'manage subtheme', 'subtheme export');
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+// COPIED FROM MTHEME MODULE BELOW
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+ 
+//--------------------------------//
+// core Drupal hooks              //
+//--------------------------------//
+
+/**
+ * Implementation of hook_help()
+ */
+function subtheme_help($path, $arg) {
+  if ($path == 'admin/help#subtheme') {
+    $txt = 'Features Control Panel provides a.... [FINISH HELP TEXT] '; // TODO
+    $output = t($txt);
+    return $output;
+  }
+}
+ 
+/**
+ * Implementation of hook_form_alter().
+ */
+/*
+function subtheme_form_alter(&$form, &$form_state, $form_id) {
+  // Modify forms for adding and editing subtheme objects
+  if ($form_id == 'ctools_export_ui_edit_item_form' && arg(2) == 'subtheme') { 
+    // admin/build/subtheme/add
+    if (arg(3) == 'add' ||
+      // admin/build/subtheme/list/subtheme_name/edit
+      (arg(3) == 'list' && arg(5) == 'edit')) {
+      // Call subtheme functions after new subthemes are added or saved.
+      // $form['#validate'][] = 'subtheme_ctools_export_ui_edit_item_form_validate'; // @TODO validate CSS
+      ctools_include('css', 'subtheme'); // include includes/css.inc
+      $form['#submit'][] = 'subtheme_ctools_export_ui_edit_item_form_submit';
+    }
+  // Modify forms for deleting and reverting subtheme objects
+  } else if ($form_id == 'ctools_export_ui_delete_confirm_form' && arg(2) == 'subtheme') {
+    ctools_include('css', 'subtheme'); // include includes/css.inc
+    $form['#submit'][] = 'subtheme_ctools_export_ui_delete_confirm_form_submit';
+  }
+}
+// */
+
+//----------------------------------------------//
+// subtheme                                       //
+//----------------------------------------------//
+
+/**
+ * Add subtheme css files.
+ *
+ * @TODO Find out if Ctools is caching these objects. 
+ *  Seems expensive to load them all each time to 
+ *  check if enabled features have disabled subthemes. 
+ * 
+ * Get all subtheme subthemes
+ *  
+ *  $subthemes
+ *     |
+ *     |
+ *  +--------------+
+ *  |              |
+ * disabled    (enabled)
+ *                 |
+ *        +---------------+
+ *        |               |
+ *  in code only          |
+ *                        | 
+ *                   in database
+ * 
+ */
+ // TODO replace "subthemes" with "subthemes" and related logic...
+function subtheme_add_css() {
+  // Get subthemes from Ctools.
+  ctools_include('export');
+  $subthemes = ctools_export_load_object('subtheme_subtheme');
+  $subthemes = (array) $subthemes;
+
+  $disabled = array();
+  $in_code_only = array();
+  $in_database = array();
+  foreach ($subthemes as $subtheme) {
+    $name = $subtheme->name;
+    if ($subtheme->disabled) { 
+      $disabled[] = $name;
+    }
+    if ($subtheme->in_code_only) {
+      $in_code_only[] = $name;  
+    }
+    if (!in_array($name, $in_code_only)) {
+      $in_database[] = $name; 
+    }
+  }
+     
+  // Load style sheets in code (features modules).
+  $features = features_get_features();
+  foreach ($features as $feature) {
+    // Make sure the feature module is enabled and has subtheme subthemes.
+    if ($feature->info['features']['subtheme_subtheme'] && $feature->status == 1) {
+      $module_name = $feature->name;
+      // Check each subtheme.
+      foreach ($feature->info['features']['subtheme_subtheme'] as $name) {
+        if (!in_array($name, $disabled) && in_array($name, $in_code_only)) {
+          $path = drupal_get_path('module', $module_name);
+          $stylesheet = $path ."/$module_name.$name.css";     // @todo maybe we don't 
+          drupal_add_css($stylesheet, 'theme', 'all', TRUE);  //  need stylesheets in 
+        }                                                     //  .info files anymore?
+      } 
+    }
+  }
+
+  // Load style sheets from files directory (in CSS in database)
+  foreach ($in_database as $name) {
+    if (!in_array($name, $disabled)) {
+      $stylesheet = file_directory_path() ."/subtheme/$name.css";
+      drupal_add_css($stylesheet, 'theme', 'all', TRUE);
+    }  
+  }
+  
+}
+
+/**
+ * @param $subthemes
+ *  array, optionally save subtheme_get_groups the work of calling
+ *  ctools_export_load_object.
+ * 
+ * @return $groups
+ *  array, subthemes organized by group 
+ *
+ * $groups[$i]['group_name'] = $group_name
+ * $groups[$i]['group_title'] = $group_title; 
+ * $groups[$i]['subthemes'][$subtheme]
+ */
+ // TODO replace "subthemes" with "subthemes" and related logic
+function subtheme_get_groups($subthemes = NULL) {
+  ctools_include('export');
+  if (!$subthemes) {
+    $subthemes = ctools_export_load_object('subtheme_subtheme');
+  } 
+  if ($subthemes) {
+    // Make a unique list of groups;
+    foreach($subthemes as $subtheme) {
+      $group_title = $subtheme->grp;
+      $group = strtolower(preg_replace('/[^a-zA-Z0-9-]+/', '-', $group_title));
+      $list[$group] = $group_title;
+    }
+    // Sort group list in alphabetical order by $group_title.
+    asort($list);
+    // Number groups.
+    $groups = array();
+    $i = 0;
+    foreach($list as $group => $group_title) {
+      $groups[$i]['group_name'] = $group;
+      $groups[$i]['group_title'] = $group_title;
+      // Organize subthemes by group.
+      foreach($subthemes as $subtheme) {
+        if($subtheme->grp == $group_title) {
+          $groups[$i]['subthemes'][] = $subtheme;
+        } 
+      }
+      // default, sort alphabetical (handle sort by weight elsewhere)
+      sort($groups[$i]['subthemes']);
+      $i++;
+    }
+    
+    return $groups;
+  } else {
+    return FALSE;
+  }
+}
+
+//--------------------------------------------------/
+// Ctools plugin                                    /
+//--------------------------------------------------/
+/**
+ * Implmenentation of hook_ctools_plugin_directory.
+ */
+function subtheme_ctools_plugin_directory($module, $plugin) {
+  if ($plugin == 'export_ui') {
+    return 'plugins/'. $plugin;
+  }
+}
+
+/**
+* Implementation of hook_ctools_plugin_api().
+*
+* Tell CTools that we support the default_mymodule_presets API.
+*/
+function subtheme_ctools_plugin_api($owner, $api) {
+  if ($owner == 'subtheme' && $api == 'default_subtheme_subtheme') {
+    return array('version' => 1);
+  }
+}
+
+//--------------------------------------------------/
+// Ctools export hooks                              /
+//--------------------------------------------------/
+
+/**
+ * Export a myobj and display it in a form.
+ * 
+ * @param $name
+ *  string, unique id for object
+ */
+function subtheme_export_subtheme(&$form_state, $name) {
+  ctools_include('export');
+  $obj = subtheme_subtheme_load($name);
+  drupal_set_title(check_plain($obj->description));
+  $code = subtheme_subtheme_export($obj);
+  $lines = substr_count($code, "\n");
+
+  $form['export'] = array(
+    '#title' => t('Export data'),
+    '#type' => 'textarea',
+    '#value' => $code,
+    '#rows' => $lines,
+    '#description' => t('Copy the export text and paste it into another myobj using the import function.'),
+  );
+  return $form;
+}
+
+/**
+ * Load a single myobj.
+ */
+function subtheme_subtheme_load($name) {
+  ctools_include('export');
+  $result = ctools_export_load_object('subtheme_subtheme', 'names', array($name)); 
+  if (isset($result[$name])) {
+    return $result[$name];
+  }
+}
+
+/**
+ * Export a myobj.
+ */
+function subtheme_subtheme_export($obj, $indent = '') {
+  ctools_include('export');
+  $output = ctools_export_object('subtheme_subtheme', $obj, $indent);
+  return $output;
+}
+
+/**
+ * Save a single myobj.
+ */
+// TODO 
+function subtheme_subtheme_save(&$myobj) {
+    $update = (isset($myobj->oid) && is_numeric($myobj->oid)) ? array('oid') : array();
+      return drupal_write_record('myobj', $myobj, $update);
+}
+
+
+
+//-------------------------------------------------/
+// Features hooks                                  /
+//-------------------------------------------------/
+/**
+ * Implementation of hook_features_api().
+ */
+/*
+function subtheme_features_api() {
+}
+// */
+
+/**
+ * Implementation of hook_features_export().
+ *
+ * Component hook.
+ * 
+ * Add elements to .info file.
+ */
+function subtheme_subtheme_features_export($data, &$export, $module_name) {
+  // Add ctools default hook.
+  $export['features']['ctools']["subtheme:default_subtheme_subtheme:1"] = "subtheme:default_subtheme_subtheme:1";
+  // Add subtheme_subtheme objects
+  foreach ($data as $component) {
+    $export['features']['subtheme_subtheme'][$component] = $component;
+    // $export['stylesheets']['all'][$component] = $component .'.css'; 
+    // @todo for some reason features components need associative arrays
+    // to come out right in the .info file. Stylesheet components 
+    // seem to need numerical arrays.  
+    $export['stylesheets']['all'][] = $module_name .'.'. $component .'.css'; 
+  }
+  return array();
+}
+
+/**
+ * Implementation of hook_features_files().
+ * 
+ * @todo This hook is provided by a patched version of 
+ * Features. See http://github.com/bhirsch/features.
+ */
+function subtheme_features_files($export, $module_name) {
+  $add_files = array();
+  if ($subtheme_subthemes = $export['features']['subtheme_subtheme']) {
+    // Get css files for each component. 
+    $i = 0;
+    $subtheme_path = file_directory_path() .'/subtheme';
+    foreach ($subtheme_subthemes as $name) {
+      // Get subtheme's CSS file
+      $add_files[$i]->name = $module_name .'.'. $name;
+      $add_files[$i]->basename = $module_name .'.'. $name .'.css'; 
+      $add_files[$i]->filename = $subtheme_path .'/'. $name .'.css';
+      $add_files[$i]->subdir = '';
+      // TODO Check for images.
+      $images_path = $subtheme_path .'/images/'. $name;
+      foreach (@file_scan_directory($images_path, '.*') as $file) {
+        $i++;
+        $add_files[$i]->name = $file->name;
+        $add_files[$i]->basename = $file->basename;
+        $add_files[$i]->filename = $file->filename;
+        $add_files[$i]->subdir = 'images/'. $name;
+      }
+      // TODO Step 6. Update theme.module and try it for real.
+      $i++;
+    }
+  }
+  return $add_files;
+}
+
+/**
+ * Implementation of hook_features_export_render().
+ *
+ * Component hook.
+ */
+/*
+function subtheme_subtheme_features_export_render($module_name, $data, $export = NULL) {
+  $render = array();
+
+  // @todo D7 upgrade:
+  // Include implementation of hook_enable to re-write CSS.
+  // This will not be necessary in D7. subtheme will be able to call 
+  // hook_modules_enabled() to listen for events like this. 
+  $code = array();
+  $code = '  subtheme_css(); // rewrite files/subtheme/subtheme.css when module is enabled'; 
+  $render['enable'] = $code;
+
+  // @todo D7 upgrade:
+  // Include implementation of hook_disable to re-write CSS.
+  // This will not be necessary in D7. subtheme will be able to call 
+  // hook_modules_enabled() to listen for events like this. 
+  $code = array();
+  $code = '  subtheme_css(); // rewrite files/subtheme/subtheme.css when module is enabled'; 
+  $render['disable'] = $code;
+
+  // This writes implementation of hook_default_subtheme_subtheme just as features/ctools
+  // would do if there were no implementation of hook_features_export render here.
+  $code = array();
+  $code[] = '$export = array();';
+  foreach ($data as $name) {
+    $subtheme = subtheme_subtheme_load($name);
+    $code[] = subtheme_subtheme_export($subtheme);
+    $code[] = "  \$export['{$name}'] = \$subtheme;";
+  }
+  $code[] = '  return $export;';
+  $code = implode("\n", $code);
+  $render['default_subtheme_subtheme'] = $code;
+
+  return $render;
+}
+// */
+
+/**
+ * Implementation of hook_features_export_options().
+ */
+// TODO 
+
+/**
+ * Implementation of hook_features_revert().
+ */
+/*
+function subtheme_features_export_revert($module_name) {
+print("subtheme_features_export_revert here: \n");
+print_r($module_name, TRUE);
+  $mycomponents = module_invoke_all($module_name, 'subtheme_defaults');
+  if (!empty($$mycomponents)) {
+    foreach ($mycomponents as $mycomponent) {
+      mycomponent_delete($mycomponent);
+    }
+  }
+}
+// */
+

@@ -1,71 +1,40 @@
- NOTE: This module is undergoing a major re-write. The API below may not be used any more. This file will be updated when the re-write is complete.
+Module Theme
+--------------
 
-
-
- // Pattern for $key => $value
- // [modulename] _ [type--selector] _ [property] => X
- // e.g. subtheme_id--press-releases_width => 150px;
- // or
- // explode '_' to separate modulename _ selector _ property
- //  
- // Make an array keyed by 
- // selector type -- selector
- // types: id, class, element
-
-array $a, reformat keys like this
- Like this: 
-    //   $a[selector][propertyA] = X
-    //   $a[selector][propertyB] = Y 
-    //   $a[selector1---selectorN][propertyC] = Q 
-
+[TODO write readme documentation]
 
 
 This only works with the following line included in template.php
+New version:
+if (module_exists('mtheme')) {
+  mtheme_add_css();  
+}
 
-$custom_css = file_directory_path() .'/subtheme/custom.css';
-if (file_exists($custom_css)) {
-  drupal_add_css($custom_css, 'theme', 'all', TRUE);
+Legacy: 
+$mtheme_css = file_directory_path() .'/mtheme/mtheme.css';
+if (file_exists($mtheme_css)) {
+  drupal_add_css($mtheme_css, 'theme', 'all', TRUE);
 }
 
 
+Comments like this: 
+------------------
+/**
+ * Group ======================================================
+ */
 
-Form API keys
-----------------------------------------------------------------
-subtheme_[type--selector]_[property]
-e.g. subtheme_class--main_background
-
-
-Working with multiple selectors
------------------------------------------------------------------
-Selectors can be separated by ---, ----, and -----. 
-
-subtheme_[type--selector]_[property]
-subtheme_[type--selector1---type--selector2---type--selectorN]_[property]
-subtheme_[type--selector1----type--selector2----type--selectorN]_[property]
-subtheme_[type--selector1-----type--selector2-----type--selectorN]_[property]
-
-e.g. these: 
-subtheme_element--h1_background
-subtheme_element--h1---id--right-sidebar---class--news_background
-subtheme_element--h1----id--right-sidebar----class--news_background
-subtheme_element--h1-----id--right-sidebar-----class--news_background
-
-become: 
-h1 { background: }
-h1#right-sidebar.news { background: }		seperated by ---
-h1 #right-sidebar .news { background: } 	seperated by ----
-h1, #right-sidebar, .news { background: } 	seperated by -----
+/* selector title */
+#selector  
+{
+  property: value; /* comment from text area */
+  property2: value; /* comment from text area */ 
+}
 
 
-Processing multiple selectors
-------------------------------------------------------------------
-To do something like this: 	h1.navbar, .navbar 
-Do this: 			element--h1---class--navbar-----class--navbar
-
-subtheme explodes selectors in this order:
-4 dashes (----)
-3 dashes (---)
-2 dashes (--)
-
-
-
+For Module Developers
+----------------------
+- write CSS with GUI
+- export as feature module: mymtheme
+- include mymtheme in your mymodule/ or mymodule/modules
+- include the CSS by declaring it in the .info file (or hook_init() if you're a rebel)
+- to enable/disable mymtheme when your module is enabled/disabled, use hook_enable and hook_disable

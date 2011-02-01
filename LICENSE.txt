@@ -290,9 +290,9 @@ to attach them to the start of each source file to most effectively
 convey the exclusion of warranty; and each file should have at least
 the "copyright" line and a pointer to where the full notice is found.
 
-    Subtheme (subtheme) is a Drupal module for creating Drupal subthemes
-    through Drupal's web interface, and making them exportable.
-    Copyright (C) 2010, 2011 Bryan Hirsch
+    This program, Module Theme (mtheme), exposes Drupal module's 
+    theme settings through a GUI and makes them exportable.
+    Copyright (C) 2011 Bryan Hirsch
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
