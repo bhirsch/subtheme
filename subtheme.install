@@ -7,7 +7,100 @@
  * hook_install()
  * 
  * set weight of this module to 10, so its submit function will run 
- * after other modules that are modifying the subtheme form.
+ * after other modules modifying the subtheme form.
  */
 function subtheme_install() {
+  drupal_install_schema('subtheme');
 }
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function subtheme_uninstall() {
+  drupal_uninstall_schema('subtheme');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function subtheme_schema() {
+  $schema['subtheme_subtheme'] = array(
+    'description' => t('Table storing subtheme (myobj), definitions.'),
+    'export' => array(
+      'key' => 'name',
+      'key name' => 'Name',
+      'primary key' => 'sid',
+      'identifier' => 'subtheme', // Exports will be as $selector
+      'default hook' => 'default_subtheme_subtheme',  // Function hook name.
+      'api' => array(
+        'owner' => 'subtheme',
+        'api' => 'default_subtheme_subtheme',  // Base name for api include files.
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+    ),
+    'fields' => array(
+      // selector id 
+      'sid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => t('Primary ID field for the table. Not used for anything except internal lookups.'),
+        'no export' => TRUE, // Do not export database-only keys.
+      ),
+      // name (machine, unique id)
+      'name' => array(
+        'type' => 'varchar',  
+        'length' => 64,      
+        'not null' => TRUE, 
+        'default' => '',
+        'description' => t('Unique ID for this object. Used to identify it programmatically.'),
+      ),
+      // title (human readable)
+      'title' => array(
+        'type' => 'varchar',  
+        'length' => 64,      
+        'not null' => TRUE, 
+        'default' => '',
+        'description' => t('Human readable title.'),
+      ),
+      // description 
+      'description' => array(
+        'type' => 'varchar',  
+        'length' => 255,      
+        'not null' => TRUE, 
+        'default' => '',
+        'description' => t('Optional description of selector.'),
+      ),
+      'subtheme' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'description' => t('A serialized form array.'),
+        'serialize' => TRUE,
+        'serialized default' => 'a:0:{}',
+      ),
+      'is_active' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => t('0 not active. 1 active.'),
+      ),
+    ),
+    'primary key' => array('sid'),
+    'unique keys' => array(
+      'name' => array('name'),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_update_N.
+ * 
+ * Add permission field.
+ */
+/*
+function subtheme_update_6001() {
+}
+// */

@@ -1,3 +1,7 @@
+ NOTE: This module is undergoing a major re-write. The API below may not be used any more. This file will be updated when the re-write is complete.
+
+
+
  // Pattern for $key => $value
  // [modulename] _ [type--selector] _ [property] => X
  // e.g. subtheme_id--press-releases_width => 150px;
