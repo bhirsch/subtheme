@@ -122,37 +122,39 @@ function subtheme_ctools_export_ui_form(&$form, &$form_state) {
       '#title' => t('Organize included selectors into groups'),
     );
     $subtheme = subtheme_get(arg(4));
-dsm($subtheme);
     $selectors = $subtheme->selectors;
-dsm($selectors, '$selectors');
-  /*
+    $grps = $subtheme->grps;
+    $groups = array(); // array( $selector_name => $group_name )
     // Organize included selectors by group
-    $grps = array();
-    foreach($subtheme as $selector) {
-//      $grp
-      
-    }
-    foreach ($options as $name => $title) {
-    
-     $grp = ($subtheme[$name]['grp']) ? $subtheme[$name]['grp'] : $subtheme[$name]['obj']->grp;
-      $form[$name] = array(
-        '#type' => 'textfield',
-        '#title' => $title,
-        '#default_value' => $grp, 
-      );
-    }
-   //*/
+    if (!$grps) { // no groups. new subtheme.
+      foreach ($selectors as $selector) {
+        $groups[$selector->name] = $selector->grp;
+      }
     } else {
-      $form['groups'] = array(
-        '#type' => 'item',
-        '#title' => t('Organize included selectors into custom groups here'),
-        '#value' => t('Click Save and then Edit to customize groups here.'),
-      );
+      foreach ($selectors as $selector) {
+        $groups[$selector->name] = $grps[$selector->name];
+      } 
     }
+    // Organize selectors by group
+    asort($groups);
+    foreach ($groups as $selector => $group) {
+      $form[$selector] = array(
+        '#type' => 'textfield',
+        '#title' => $options[$selector],
+        '#default_value' => $group, 
+      );
+    } 
+  } else {
+    $form['groups'] = array(
+      '#type' => 'item',
+      '#title' => t('Organize included selectors into custom groups here'),
+      '#value' => t('Click Save and then Edit to customize groups here.'),
+    );
+  }
 }
 
 /**
- * Format the subtheme field.
+ * Process input.
  * 
  * $subtheme = array(
  *   'selector_name_B' => $selector, //  mtheme_selector object
@@ -166,7 +168,19 @@ dsm($selectors, '$selectors');
 function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state) {
   ctools_include('export');
   $selectors = $form_state['values']['selectors'];
+
   $processed_selectors = array();
+  $processed_groups = array();
+
+  if (arg(3) == 'add') { // new subtheme
+    foreach ($selectors as $selector_name => $include) {
+      if ($include) {
+        $processed_selectors[$selector_name] = mtheme_selector_load($selector_name);
+      } else {
+        unset($processed_selectors[$selector_name]);
+      }
+    }
+  } 
 
   if (arg(5) == 'edit') { // update existing subtheme
     $subtheme_name = $form_state['values']['name'];
@@ -182,18 +196,13 @@ function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state)
         // New selector being added to existing subtheme.
         $processed_selectors[$selector_name] = mtheme_selector_load($selector_name);
       }
+    // Process groups
+    $processed_groups[$selector_name] = $form_state['values'][$selector_name];
     }
-  } else { // new subtheme
-    foreach ($selectors as $selector_name => $include) {
-      if ($include) {
-        $processed_selectors[$selector_name] = mtheme_selector_load($selector_name);
-      } else {
-        unset($processed_selectors[$selector_name]);
-      }
-    }
-  } 
+  }
 
   $form_state['values']['selectors'] = $processed_selectors;
+  $form_state['values']['grps'] = $processed_groups;
 }
 
 /**
