@@ -36,9 +36,13 @@ function subtheme_generate_css($subtheme) {
   $css = _mtheme_start_css(); // @todo Move css-writing helper functions into own module.
   $groups = $subtheme->grps;
   asort($groups);
+  $group_comments = array();
   foreach ($groups as $selector_name => $group) {
+    if (!$group_comments[$group]) { // One group comment line per group please.
+      $css = _mtheme_group_comment($css, $group); // @todo move func to css module.
+      $group_comments[$group] = TRUE;
+    }
     $selector = $subtheme->selectors[$selector_name];
-    $css = _mtheme_group_comment($css, $group); // @todo move func to css module.
     $css = _mtheme_write_selector_css($css, $selector); 
   }
 
