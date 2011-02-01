@@ -106,7 +106,7 @@ function subtheme_ctools_export_ui_form(&$form, &$form_state) {
   // TODO process array to get checkboxes. see subtheme_admin_get().
   //$options = subtheme_admin_options_get(arg(4));
   $options = subtheme_admin_options_get();
-  $form['subtheme'] = array(
+  $form['selectors'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Include these selectors in your subtheme'),
     '#description' => t('Checked items will be available at admin/subtheme/name'),
@@ -115,33 +115,47 @@ function subtheme_ctools_export_ui_form(&$form, &$form_state) {
     '#prefix' => "<div class='subtheme subtheme-admin-checkboxes'>",
     '#suffix' => "</div>",
   );
-
-}
-
-
-  /*
-  if ($name) {
-    $subtheme = subtheme_get($name);
+  // Enable user to reorganize selectors into groups.
+  if (arg(2) == 'subtheme' && arg(5) == 'edit') {
+    $form['groups'] = array(
+      '#type' => 'item',
+      '#title' => t('Organize included selectors into groups'),
+    );
+    $subtheme = subtheme_get(arg(4));
 dsm($subtheme);
-    foreach($selectors as $selector) {
-      if (in_array($selector->name, $subtheme) {
-        $options[$selector->name] = TRUE,
-      }
+    $selectors = $subtheme->selectors;
+dsm($selectors, '$selectors');
+  /*
+    // Organize included selectors by group
+    $grps = array();
+    foreach($subtheme as $selector) {
+//      $grp
+      
     }
-  } else { // new subtheme, admin/build/subtheme/add
-  }
- // */
+    foreach ($options as $name => $title) {
+    
+     $grp = ($subtheme[$name]['grp']) ? $subtheme[$name]['grp'] : $subtheme[$name]['obj']->grp;
+      $form[$name] = array(
+        '#type' => 'textfield',
+        '#title' => $title,
+        '#default_value' => $grp, 
+      );
+    }
+   //*/
+    } else {
+      $form['groups'] = array(
+        '#type' => 'item',
+        '#title' => t('Organize included selectors into custom groups here'),
+        '#value' => t('Click Save and then Edit to customize groups here.'),
+      );
+    }
+}
 
 /**
  * Format the subtheme field.
  * 
  * $subtheme = array(
- *   'selector_name_A' => FALSE, // This selector is not included in the subtheme
- *   'selector_name_B' => array( // This one will be included
- *     'group' => 'Group Name',
- *     'selector' => $selector->css_selector,
- *     'properties' => $selector->css_properties
- *   ), 
+ *   'selector_name_B' => $selector, //  mtheme_selector object
  * );
  *
  * For selectors to be included, check to see if this value
@@ -150,23 +164,45 @@ dsm($subtheme);
  * included with the subthem, grab the values from the mtheme_selector. 
  */
 function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state) {
-  $selectors = $form_state['values']['subtheme'];
-  $subtheme_name = $form_state['values']['name'];
-  $subtheme = subtheme_get($subtheme_name);
-  $subtheme = $subtheme->subtheme;
-
   ctools_include('export');
-  $subtheme_values = array();
+  $selectors = $form_state['values']['selectors'];
+  $processed_selectors = array();
 
-  foreach ($selectors as $selector_name => $include) {
-    if ($include && array_key_exists($selector_name, $subtheme)) {
-      // Store already-saved value.
-      $subtheme_values[$selector_name] = $subtheme[$selector_name];
-    } else if ($include) { 
-      // Get default value from mtheme module.
-     $subtheme_values[$selector_name] = mtheme_selector_load($selector_name);
+  if (arg(5) == 'edit') { // update existing subtheme
+    $subtheme_name = $form_state['values']['name'];
+    $subtheme = subtheme_get($subtheme_name);
+    $saved_selectors = $subtheme->selectors;
+    foreach ($selectors as $selector_name => $include) {
+      if (!$include) {
+        unset($processed_selectors[$selector_name]);
+      } else if ($include && array_key_exists($selector_name, $saved_selectors)) {
+        // Store already-saved value, in case user has made changes.
+        $processed_selectors[$selector_name] = $saved_selectors[$selector_name];
+      } else if ($include && !array_key_exists($selector_name, $saved_selectors)) {
+        // New selector being added to existing subtheme.
+        $processed_selectors[$selector_name] = mtheme_selector_load($selector_name);
+      }
     }
-  }
+  } else { // new subtheme
+    foreach ($selectors as $selector_name => $include) {
+      if ($include) {
+        $processed_selectors[$selector_name] = mtheme_selector_load($selector_name);
+      } else {
+        unset($processed_selectors[$selector_name]);
+      }
+    }
+  } 
 
-  $form_state['values']['subtheme'] = $subtheme_values;
+  $form_state['values']['selectors'] = $processed_selectors;
+}
+
+/**
+ * Callback for form submission.
+ *
+ * When subthemes are created or updated, re-write CSS.
+ */
+function subtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
+  ctools_include('subtheme', 'subtheme'); 
+  $subtheme = $form_state['item'];
+  subtheme_css($subtheme); 
 }

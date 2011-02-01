@@ -72,10 +72,17 @@ function subtheme_schema() {
         'default' => '',
         'description' => t('Optional description of selector.'),
       ),
-      'subtheme' => array(
+      'selectors' => array(
         'type' => 'text',
         'size' => 'big',
-        'description' => t('A serialized form array.'),
+        'description' => t('A serialized array of mtheme selectors included in each subtheme.'),
+        'serialize' => TRUE,
+        'serialized default' => 'a:0:{}',
+      ),
+      'grps' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'description' => t('A serialized array of groups, to organize selectors.'),
         'serialize' => TRUE,
         'serialized default' => 'a:0:{}',
       ),

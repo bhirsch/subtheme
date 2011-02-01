@@ -72,8 +72,8 @@ function subtheme_form_alter(&$form, &$form_state, $form_id) {
       // admin/build/subtheme/list/subtheme_name/edit
       (arg(3) == 'list' && arg(5) == 'edit')) {
       // Prep data to save.
-      $form['#validate'][] = 'subtheme_ctools_export_ui_edit_item_form_validate'; // @TODO validate CSS
-      //$form['#submit'][] = 'subtheme_ctools_export_ui_edit_item_form_submit';
+      $form['#validate'][] = 'subtheme_ctools_export_ui_edit_item_form_validate';
+      $form['#submit'][] = 'subtheme_ctools_export_ui_edit_item_form_submit';
     }
   // Modify forms for deleting and reverting subtheme objects
   } else if ($form_id == 'ctools_export_ui_delete_confirm_form' && arg(2) == 'subtheme') {
@@ -158,11 +158,15 @@ function subtheme_admin_options_get() {
  */
 function subtheme_admin_options_default_values($name, $options) {
   $subtheme = subtheme_get($name);
-  $subtheme = $subtheme->subtheme;
+  $selectors = $subtheme->selectors;
   $default_values = array();
-  foreach ($options as $name => $details) {
-    $default_values[$name] = (array_key_exists($name, $subtheme)) ? $name : FALSE;
-  } 
+  if ($selectors) {
+    foreach ($options as $name => $details) {
+      $default_values[$name] = (array_key_exists($name, $selectors)) ? $name : FALSE;
+    } 
+  } else {
+    $default_values[$name] = FALSE;
+  }
 
   return $default_values;
 }
