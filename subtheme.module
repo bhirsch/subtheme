@@ -50,6 +50,69 @@ function subtheme_perm() {
   return array('administer subtheme', 'manage subtheme', 'subtheme export');
 }
 
+/**
+ * Implementation of hook_theme().
+ */
+function subtheme_theme() {
+  return array(
+    'subtheme_options_details' => array(
+      'arguments' => array('selector' => NULL),
+    ),
+  );  
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function subtheme_form_alter(&$form, &$form_state, $form_id) {
+  // Modify forms for adding and editing subtheme objects
+  if ($form_id == 'ctools_export_ui_edit_item_form' && arg(2) == 'subtheme') { 
+    // admin/build/subtheme/add
+    if (arg(3) == 'add' ||
+      // admin/build/subtheme/list/subtheme_name/edit
+      (arg(3) == 'list' && arg(5) == 'edit')) {
+      // Prep data to save.
+      $form['#validate'][] = 'subtheme_ctools_export_ui_edit_item_form_validate'; // @TODO validate CSS
+      //$form['#submit'][] = 'subtheme_ctools_export_ui_edit_item_form_submit';
+    }
+  // Modify forms for deleting and reverting subtheme objects
+  } else if ($form_id == 'ctools_export_ui_delete_confirm_form' && arg(2) == 'subtheme') {
+    // TODO ADD INCLUDE ctools_include('css', 'subtheme'); // include includes/css.inc
+    // TODO // $form['#submit'][] = 'subtheme_ctools_export_ui_delete_confirm_form_submit';
+  }
+}
+
+/**
+ * Theme option details (that is, the value
+ * for an individual option in the list of options)
+ * on the admin/build/subtheme/add and /edit forms.
+ */
+function theme_subtheme_options_details($selector) {
+  /*
+    $path = drupal_get_path('module', 'subtheme') .'/subtheme.css';
+    drupal_add_css($path);
+
+     $output = '';
+     $output .= "<div class='subtheme subtheme-options-details'>";
+       $output .= "<div class='subtheme-options-title'>". t($selector->title) ."</div>";
+       $output .= "<div class='subtheme-options-name'>". $selector->name ."</div>";
+       $output .= "<div class='subtheme-options-selector'>". $selector->css_selector ."</div>";
+       $output .= "<div class='subtheme-options-description'>". $selector->description ."</div>";
+       //$output .= "<div class='subtheme-options-css'>". ."</div>";
+     $output .= "</div>";
+  // */
+
+   $output = '';
+   $output .= t($selector->title);
+   $output .= ', '. $selector->name;
+   $output .= ' ('.  $selector->css_selector .')';
+   if ($selector->disabled) {
+     $output .= ' '. t('DISABLED');   
+   }
+
+   return $output;
+}
+
 //-------------------------------------------//
 // Subtheme                                  //
 //-------------------------------------------//
@@ -74,7 +137,35 @@ function subtheme_set($subtheme) {
 /**
  *
  */
-function subtheme_admin_options_get($name) {}
+function subtheme_admin_options_get() {
+  $selectors = mtheme_get_selectors(); 
+
+  // Show all mtheme selectors as options
+  $options = array();
+  foreach ($selectors as $selector) {
+    $details = theme('subtheme_options_details', $selector);
+    $options[$selector->name] = $details;
+  }
+
+  return $options;
+}
+
+/**
+ * @param $name
+ *  string, subtheme name
+ *
+ * @param $options
+ */
+function subtheme_admin_options_default_values($name, $options) {
+  $subtheme = subtheme_get($name);
+  $subtheme = $subtheme->subtheme;
+  $default_values = array();
+  foreach ($options as $name => $details) {
+    $default_values[$name] = (array_key_exists($name, $subtheme)) ? $name : FALSE;
+  } 
+
+  return $default_values;
+}
 
 /**
  *
@@ -182,28 +273,6 @@ function subtheme_help($path, $arg) {
   }
 }
  
-/**
- * Implementation of hook_form_alter().
- */
-/*
-function subtheme_form_alter(&$form, &$form_state, $form_id) {
-  // Modify forms for adding and editing subtheme objects
-  if ($form_id == 'ctools_export_ui_edit_item_form' && arg(2) == 'subtheme') { 
-    // admin/build/subtheme/add
-    if (arg(3) == 'add' ||
-      // admin/build/subtheme/list/subtheme_name/edit
-      (arg(3) == 'list' && arg(5) == 'edit')) {
-      // Call subtheme functions after new subthemes are added or saved.
-      // $form['#validate'][] = 'subtheme_ctools_export_ui_edit_item_form_validate'; // @TODO validate CSS
-      ctools_include('css', 'subtheme'); // include includes/css.inc
-      $form['#submit'][] = 'subtheme_ctools_export_ui_edit_item_form_submit';
-    }
-  // Modify forms for deleting and reverting subtheme objects
-  } else if ($form_id == 'ctools_export_ui_delete_confirm_form' && arg(2) == 'subtheme') {
-    ctools_include('css', 'subtheme'); // include includes/css.inc
-    $form['#submit'][] = 'subtheme_ctools_export_ui_delete_confirm_form_submit';
-  }
-}
 // */
 
 //----------------------------------------------//

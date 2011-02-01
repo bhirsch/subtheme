@@ -49,25 +49,16 @@ function subtheme_ctools_export_ui_form(&$form, &$form_state) {
   $form['title'] = array(
     '#type' => 'textfield',
     '#title' => t('Title'),
-    '#description' => t('Human readable CSS subtheme name. '
-                       .'This will be included in .css file as a comment '
-                       .'above the subtheme.'),
+    '#description' => t('Human readable Subtheme name. '),
     '#default_value' => $subtheme->title,
     '#required' => FALSE,
   );
-  $form['css_subtheme'] = array(
+  $form['description'] = array(
     '#type' => 'textfield',
-    '#title' => t('CSS Selector'),
-    '#description' => t('CSS subtheme. E.g. div or  div#example .demo '),
-    '#default_value' => $subtheme->css_subtheme,
-    '#required' => true,
-  );
-  $form['css_properties'] = array(
-    '#type' => 'textarea',
-    '#title' => t('CSS Properties'),
-    '#default_value' => $subtheme->css_properties,
-    '#description' => t('E.g. background-color: white; <br/> font-size: 12px; '),
-    '#required' => true,
+    '#title' => t('Description'),
+    '#description' => t('Optional description.'),
+    '#default_value' => $subtheme->description,
+    '#required' => FALSE,
   );
   // Include files field group for uploading background images
   // Include enctype, otherwise uploads won't work!
@@ -86,10 +77,10 @@ function subtheme_ctools_export_ui_form(&$form, &$form_state) {
       '#element_validate' => array('subtheme_save_files'),
     );
     // Check for available files
-
     $name = arg(4);
-    $path = file_directory_path() .'/subtheme/images/'. $name;  
+    $path = file_directory_path() .'/subtheme/'. $name .'/images';  
     $i = 0; // Use counter in case of conflicting $file->basename values
+    file_check_directory($path, FILE_CREATE_DIRECTORY);
     foreach (@file_scan_directory($path, '.*') as $file) {
       $title = "images/$name/$file->basename";
       $link = l($title, $file->filename);
@@ -111,26 +102,71 @@ function subtheme_ctools_export_ui_form(&$form, &$form_state) {
       '#value' => t('Save then click Edit to add background files here.'),
     );  
   }
-  $form['grp'] = array(
-    '#type' => 'textfield',
-    '#title' => t('CSS Selector Group'),
-    '#description' => t("Group subthemes together. (Use your module name if you're not sure what to put here.)"),
-    '#default_value' => $subtheme->grp,
-    '#required' => TRUE,
-  );
-  $form['description'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Description'),
-    '#description' => t('Optional description.'),
-    '#default_value' => $subtheme->description,
-    '#required' => FALSE,
-  );
-  $form['weight'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Weight'),
-    '#description' => t('Sort order of subthemes for multiple identical subthemes.'),
-    '#default_value' => $subtheme->weight,
-    '#required' => FALSE,
+  // TODO subtheme_get('name');
+  // TODO process array to get checkboxes. see subtheme_admin_get().
+  //$options = subtheme_admin_options_get(arg(4));
+  $options = subtheme_admin_options_get();
+  $form['subtheme'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Include these selectors in your subtheme'),
+    '#description' => t('Checked items will be available at admin/subtheme/name'),
+    '#default_value' => subtheme_admin_options_default_values(arg(4), $options),
+    '#options' => $options,
+    '#prefix' => "<div class='subtheme subtheme-admin-checkboxes'>",
+    '#suffix' => "</div>",
   );
 
+}
+
+
+  /*
+  if ($name) {
+    $subtheme = subtheme_get($name);
+dsm($subtheme);
+    foreach($selectors as $selector) {
+      if (in_array($selector->name, $subtheme) {
+        $options[$selector->name] = TRUE,
+      }
+    }
+  } else { // new subtheme, admin/build/subtheme/add
+  }
+ // */
+
+/**
+ * Format the subtheme field.
+ * 
+ * $subtheme = array(
+ *   'selector_name_A' => FALSE, // This selector is not included in the subtheme
+ *   'selector_name_B' => array( // This one will be included
+ *     'group' => 'Group Name',
+ *     'selector' => $selector->css_selector,
+ *     'properties' => $selector->css_properties
+ *   ), 
+ * );
+ *
+ * For selectors to be included, check to see if this value
+ * has already been included and possibly overridden. (If it show up in 
+ * subtheme_get(), it's already included.) If it's newly being 
+ * included with the subthem, grab the values from the mtheme_selector. 
+ */
+function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state) {
+  $selectors = $form_state['values']['subtheme'];
+  $subtheme_name = $form_state['values']['name'];
+  $subtheme = subtheme_get($subtheme_name);
+  $subtheme = $subtheme->subtheme;
+
+  ctools_include('export');
+  $subtheme_values = array();
+
+  foreach ($selectors as $selector_name => $include) {
+    if ($include && array_key_exists($selector_name, $subtheme)) {
+      // Store already-saved value.
+      $subtheme_values[$selector_name] = $subtheme[$selector_name];
+    } else if ($include) { 
+      // Get default value from mtheme module.
+     $subtheme_values[$selector_name] = mtheme_selector_load($selector_name);
+    }
+  }
+
+  $form_state['values']['subtheme'] = $subtheme_values;
 }

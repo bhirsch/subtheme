@@ -1,0 +1,5 @@
+<?php
+/**
+ * @file subtheme.inc
+ */
+
