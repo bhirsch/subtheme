@@ -9,12 +9,20 @@ files/subtheme/subtheme_name/images/imageB.jpg
 files/subtheme/subtheme_name/images/imageC.gif
 
 
- * Format the subtheme field.
- * 
- * $subtheme = array(
- *   'selector_name_A' => FALSE, // This selector is not included in the subtheme
- *   'selector_name_B' => array( // This one will be included
- *     'group' => 'Group Name',
- *     'obj' => $selector, // mtheme_selector object
- *   ), 
- * );
+the $subtheme object
+--------------------------------------------------------------------
+$subtheme->name = 'name';             // machine, unique identifier
+$subtheme->title = 'title';           // human readable
+$subtheme->description = 'name';
+$subtheme->selectors = array(
+  'selector_name_1' => (object) stdClass
+  'selector_name_2' => (object) stdClass
+  'selector_name_N' => (object) stdClass
+);
+$subtheme->grps = array(
+  'selector_name_1' => 'Group Name', 
+  'selector_name_2' => 'Another Group Name',
+  'selector_name_N' => 'A Group name',
+);
+$subtheme->is_active = 0; // or 1;
+

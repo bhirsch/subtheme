@@ -41,7 +41,9 @@ function subtheme_menu() {
     'weight' => 11,
   );
   $items['admin/build/subtheme/customize/%'] = array(
-    'title' => t('Customize Subtheme'), 
+    'title callback' => '_subtheme_title_customize_page',
+    //'title arguments' => array(arg(4)),
+    //'title' => t('Customize Subtheme'), 
     'description' => t('Customize Subtheme'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('subtheme_form'),
@@ -130,6 +132,13 @@ function theme_subtheme_options_details($selector) {
 // Subtheme                                  //
 //-------------------------------------------//
 
+function _subtheme_title_customize_page() {
+  $name = arg(4);
+  $title = t('Customize Subtheme: '); 
+  $title .= t(subtheme_get_title($name));
+  return $title;
+}
+
 /**
  * @param $name
  *  string, subtheme name.
@@ -137,6 +146,18 @@ function theme_subtheme_options_details($selector) {
 function subtheme_get($name) {
   ctools_include('export');
   return subtheme_subtheme_load($name);
+}
+
+/**
+ * @param $name
+ *  string, subtheme name
+ *
+ * @return $title
+ *  Subtheme title.
+ */
+function subtheme_get_title($name) {
+ $subtheme = subtheme_get($name);
+ return $subtheme->title;
 }
 
 /**

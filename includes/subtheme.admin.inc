@@ -39,19 +39,6 @@ function _subtheme_options($number, $subthemes) {
   return $options;
 }
 
-/**
- * Callback for admin/build/subtheme/customize/%
- */
-function subtheme_form() {
-  $name = arg(2); // subtheme name
-  $form['test'] = array(
-    '#type' => 'item',
-    '#title' => 'testing 1 2 3',
-  );  
-  dsm("it works! subtheme name: $name");
-
-  return $form;
-}
 
 /**
  * Callback for admin/build/subtheme/customize
@@ -74,4 +61,64 @@ function theme_subtheme_customize_links($subthemes) {
   }
     
   return $output;
+}
+
+/**
+ * Callback for admin/build/subtheme/customize/%
+ */
+function subtheme_form() {
+  $name = arg(4);
+  $subtheme = subtheme_get($name);
+//dsm($subtheme);
+  $default_selectors = mtheme_get_selectors();
+
+  // Organize by groups
+  $groups = $subtheme->grps;
+  asort($groups);
+  $group_fieldset = array();
+  foreach ($groups as $selector_name => $group) {
+
+    // Create new fieldset
+    if (!$group_fieldset[$group]) { 
+      $group_fieldset[$group] = TRUE;
+      $group_title = $group;
+      $group = strtolower(preg_replace('/[^a-zA-Z0-9-]+/', '-', $group_title));
+      $form[$group] = array(
+        '#type' => 'fieldset',
+        '#title' => t($group_title),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+      );
+
+      // Add selectors
+      $selector = $subtheme->selectors[$selector_name];
+      $form[$group][$selector->name] = array(
+        '#type' => 'textarea',
+        '#title' => t($selector->title),
+        '#default_value' => $selector->css_properties,
+        '#description' => t('CSS selector: ') . $selector->css_selector .'<br />'. t('default: ') . $default_selectors[$selector->name]->css_properties, 
+      );
+    }
+  }
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  return $form;
+}
+
+/**
+ *  $subtheme->selectors = array(
+ *    'selector_name_1' => (object) stdClass
+ *    'selector_name_2' => (object) stdClass
+ *    'selector_name_N' => (object) -> css_properties 
+ *  );
+ */
+function subtheme_form_submit(&$form, &$form_state) {
+  dsm($form, 'form'); 
+  dsm($form_state, 'form_state'); 
+
+  // CONTINUE HERE
+  
 }

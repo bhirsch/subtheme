@@ -115,6 +115,7 @@ function subtheme_ctools_export_ui_form(&$form, &$form_state) {
     '#prefix' => "<div class='subtheme subtheme-admin-checkboxes'>",
     '#suffix' => "</div>",
   );
+
   // Enable user to reorganize selectors into groups.
   if (arg(2) == 'subtheme' && arg(5) == 'edit') {
     $form['groups'] = array(
@@ -157,9 +158,6 @@ function subtheme_ctools_export_ui_form(&$form, &$form_state) {
 /**
  * Process input.
  * 
- * $subtheme = array(
- *   'selector_name_B' => $selector, //  mtheme_selector object
- * );
  *
  * For selectors to be included, check to see if this value
  * has already been included and possibly overridden. (If it show up in 
