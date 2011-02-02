@@ -13,15 +13,6 @@ function subtheme_menu() {
   $items = array();
 
   // TODO 
-  $items['admin/settings/subtheme'] = array(
-    'title' => t('Subtheme Module Settings'), 
-    'description' => t('Configure subtheme module'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('subtheme_admin_settings'),
-    'access arguments' => array('administer subtheme'), 
-    'type' => MENU_NORMAL_ITEM,
-    'file' => 'subtheme.admin.inc', 
-  );
   $items['admin/build/subtheme/%/export'] = array(
     'title' => 'export',
     'page callback' => 'drupal_get_form',
@@ -29,23 +20,34 @@ function subtheme_menu() {
     'access arguments' => array('subtheme export'),
     'type' => MENU_CALLBACK,
   );
-  $items['admin/subtheme'] = array(
-    'title' => t('Select a Subtheme'), 
-    'description' => t('Activate a subtheme'),
+
+  $items['admin/build/subtheme/activate'] = array(
+    'title' => t('Activate'), 
+    'description' => t('Activate selected subtheme'),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('subtheme_selection_form'),
+    'page arguments' => array('subtheme_activation_form'),
     'access arguments' => array('manage subtheme'), 
-    'type' => MENU_NORMAL_ITEM,
-    'file' => 'subtheme.form.inc', 
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/subtheme.admin.inc', 
+    'weight' => 10,
   );
-  $items['admin/subtheme/%/form1'] = array(
-    'title' => t('Subtheme Settings'), 
-    'description' => t('Configure Subtheme'),
+  $items['admin/build/subtheme/customize'] = array(
+    'title' => t('Customize'), 
+    'description' => t('Customize subthemes'),
+    'page callback' => 'subtheme_customize_page',
+    'access arguments' => array('manage subtheme'), 
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/subtheme.admin.inc', 
+    'weight' => 11,
+  );
+  $items['admin/build/subtheme/customize/%'] = array(
+    'title' => t('Customize Subtheme'), 
+    'description' => t('Customize Subtheme'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('subtheme_form'),
     'access arguments' => array('manage subtheme'), 
     'type' => MENU_NORMAL_ITEM,
-    'file' => 'subtheme.form.inc', 
+    'file' => 'includes/subtheme.admin.inc', 
   );
 
   return $items;
@@ -65,6 +67,9 @@ function subtheme_theme() {
   return array(
     'subtheme_options_details' => array(
       'arguments' => array('selector' => NULL),
+    ),
+    'subtheme_customize_links' => array(
+      'arguments' => array('subthemes' => NULL),
     ),
   );  
 }
