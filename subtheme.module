@@ -28,7 +28,7 @@ function subtheme_menu() {
     'page arguments' => array('subtheme_activation_form'),
     'access arguments' => array('manage subtheme'), 
     'type' => MENU_LOCAL_TASK,
-    'file' => 'includes/subtheme.admin.inc', 
+    'file' => 'includes/subtheme.activate.inc', 
     'weight' => 10,
   );
   $items['admin/build/subtheme/customize'] = array(
@@ -37,7 +37,7 @@ function subtheme_menu() {
     'page callback' => 'subtheme_customize_page',
     'access arguments' => array('manage subtheme'), 
     'type' => MENU_LOCAL_TASK,
-    'file' => 'includes/subtheme.admin.inc', 
+    'file' => 'includes/subtheme.customize.inc', 
     'weight' => 11,
   );
   $items['admin/build/subtheme/customize/%'] = array(
@@ -49,7 +49,7 @@ function subtheme_menu() {
     'page arguments' => array('subtheme_form'),
     'access arguments' => array('manage subtheme'), 
     'type' => MENU_NORMAL_ITEM,
-    'file' => 'includes/subtheme.admin.inc', 
+    'file' => 'includes/subtheme.customize.inc', 
   );
 
   return $items;
