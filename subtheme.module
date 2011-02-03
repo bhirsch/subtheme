@@ -295,8 +295,8 @@ function subtheme_subtheme_export($obj, $indent = '') {
  */
 // TODO 
 function subtheme_subtheme_save(&$myobj) {
-    $update = (isset($myobj->oid) && is_numeric($myobj->oid)) ? array('oid') : array();
-      return drupal_write_record('myobj', $myobj, $update);
+    $update = (isset($myobj->sid) && is_numeric($myobj->sid)) ? array('sid') : array();
+      return drupal_write_record('subtheme_subtheme', $myobj, $update);
 }
 
 

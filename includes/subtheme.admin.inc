@@ -9,28 +9,59 @@
  */
 function subtheme_activation_form() {
   $subthemes = subtheme_get_subthemes();
-  $form['subtheme'] = array(
+  $form['activate'] = array(
     '#type' => 'radios',
     '#title' => t('Activate a subtheme by making a selection here'),
-    '#options' => _subtheme_options(1, $subthemes),
-    '#default_value' => '',// TODO
+    '#options' => _subtheme_options($subthemes),
+    '#default_value' => subtheme_get_active_subtheme(),
   );  
-  $form['save'] = array(
-    '#type' => 'button', 
+  $form['submit'] = array(
+    '#type' => 'submit', 
     '#value' => t('Save'),
   );
 
   return $form;
 }
+/**
+ * Implementation of hook_FORM_ID_submit().
+ *
+ * Activate selected subtheme.
+ */
+function subtheme_activation_form_submit(&$form, &$form_state) {
+  $subtheme_name = $form_state['values']['activate'];
+  subtheme_activate($subtheme_name);
+}
+/**
+ * Activate subtheme.
+ *
+ * Currently, there can only be one active subtheme at any given point
+ * in time. 
+ * 
+ * @todo Set up subthemes to work more like themes that can be 
+ *  enabled/disabled for different users, organic groups, etc.
+ *
+ * @param $name
+ *  string, subtheme name.
+ */
+function subtheme_activate($name) {
+  // Set active subtheme to inactive.
+  db_query("UPDATE {subtheme_subtheme} SET is_active = 0 WHERE is_active = 1");
+  // Activate selected subtheme.
+  db_query("UPDATE {subtheme_subtheme} SET is_active = 1 WHERE name = '%s' ", $name);
+}
+/**
+ * @return string, active subtheme name.
+ */
+function subtheme_get_active_subtheme() {
+ return db_result(db_query("SELECT name FROM {subtheme_subtheme} WHERE is_active = 1")); 
+}
+
 
 /**
  * @param $subthemes
  *  array of subtheme objects
- * 
- * @param $number
- *  integer, form number (e.g. form1, form2, for path)
  */
-function _subtheme_options($number, $subthemes) {
+function _subtheme_options($subthemes) {
   $options = array();
   foreach ($subthemes as $subtheme) {
     $options[$subtheme->name] = $subtheme->title;
@@ -109,6 +140,13 @@ function subtheme_form() {
 }
 
 /**
+ * Implementation of hook_form_submit().
+ * 
+ * Save new $subtheme. Re-write CSS.
+ * 
+ * Form being submited is from path: admin/build/subtheme/customize.
+ * 
+ * Process form then save $subtheme object like this: 
  *  $subtheme->selectors = array(
  *    'selector_name_1' => (object) stdClass
  *    'selector_name_2' => (object) stdClass
@@ -116,9 +154,24 @@ function subtheme_form() {
  *  );
  */
 function subtheme_form_submit(&$form, &$form_state) {
-  dsm($form, 'form'); 
-  dsm($form_state, 'form_state'); 
+  $name = arg(4);
+  $subtheme = subtheme_get($name);
 
-  // CONTINUE HERE
-  
+  $values = $form_state['values'];
+  foreach ($values as $selector_name => $css_properties) {
+    $subtheme->selectors[$selector_name]->css_properties = $css_properties;
+  }
+
+  subtheme_save($subtheme);
+  ctools_include('subtheme', 'subtheme');
+  subtheme_css($subtheme);
+}
+/**
+ * Wrapper function for subtheme_subtheme_save($subtheme).
+ * 
+ * Original function is a Ctools hook: 
+ * mymodule_myobj_save($obj). This is just shorter and sweeter.
+ */
+function subtheme_save($subtheme) {
+  subtheme_subtheme_save($subtheme);  
 }
