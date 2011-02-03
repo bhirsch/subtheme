@@ -64,6 +64,40 @@ function subtheme_form() {
       );
     }
   }
+
+  // Include files field group for uploading background images
+  // Include enctype, otherwise uploads won't work!
+  $form['#attributes'] = array('enctype' => 'multipart/form-data');
+  $form['files'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Files'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['files']['file'] = array(
+    '#type' => 'file',
+    '#title' => t('Files'),
+    '#size' => 30,
+    '#element_validate' => array('subtheme_save_files'),
+  );
+  // Check for available files
+  $name = arg(4);
+  $path = file_directory_path() .'/subtheme/'. $name .'/images';  
+  $i = 0; // Use counter in case of conflicting $file->name values
+  foreach (@file_scan_directory($path, '.*') as $file) {
+    $title = "images/$file->basename";
+    $link = l($title, $file->filename);
+    // Add form items
+    $item = $file->basename;
+    $form['files'][$item] = array(
+      '#type' => 'item',
+      '#title' => t("File "). $i,
+      '#value' => $link,
+      '#description' => t("Add this file to your CSS like this: "
+                         ."background: url('". $title ."');"),
+    );
+    $i++; 
+  }
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
@@ -107,4 +141,32 @@ function subtheme_form_submit(&$form, &$form_state) {
  */
 function subtheme_save($subtheme) {
   subtheme_subtheme_save($subtheme);  
+}
+
+/**
+ * Save image files.
+ * 
+ * Callback for #element_validate on 
+ * #files element of subtheme_form.
+ */
+function subtheme_save_files($form, &$form_state) {
+  $name = arg(4); 
+  // Get parent (the form element that called this function)
+  $parent = $form['#parents'][0];
+  // Check for a new uploaded file, and use that if available.
+  if ($file = file_save_upload($parent)) {
+    // Get file extension.
+    $parts = pathinfo($file->filename);
+    //$extension = $parts['extension'];
+    // Check for images file directory. Create if needed.
+    $directory = file_directory_path() .'/subtheme/'. $name. '/images';
+    file_check_directory($directory, FILE_CREATE_DIRECTORY);
+    //Name the file. 
+    $file_path = $directory ."/". $file->filename;
+    // The image was saved using file_save_upload() and was added to the
+    // files table as a temporary file. We'll make a copy and let the garbage
+    // collector delete the original upload.
+    file_copy($file, $file_path, FILE_EXISTS_REPLACE);
+  }
+  return $form;
 }
