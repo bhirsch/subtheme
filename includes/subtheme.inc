@@ -39,7 +39,7 @@ function subtheme_generate_css($subtheme) {
   $group_comments = array();
   foreach ($groups as $selector_name => $group) {
     if (!$group_comments[$group]) { // One group comment line per group please.
-      $css = _mtheme_group_comment($css, $group); // @todo move func to css module.
+      $css = _mtheme_group_comment($css, array('group_title' => $group)); // @todo move func to css module.
       $group_comments[$group] = TRUE;
     }
     $selector = $subtheme->selectors[$selector_name];

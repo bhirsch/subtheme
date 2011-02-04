@@ -33,7 +33,6 @@ function theme_subtheme_customize_links($subthemes) {
 function subtheme_form() {
   $name = arg(4);
   $subtheme = subtheme_get($name);
-//dsm($subtheme);
   $default_selectors = mtheme_get_selectors();
 
   // Organize by groups
@@ -41,28 +40,28 @@ function subtheme_form() {
   asort($groups);
   $group_fieldset = array();
   foreach ($groups as $selector_name => $group) {
+    $group_title = $group;
+    $group = strtolower(preg_replace('/[^a-zA-Z0-9-]+/', '-', $group_title));
 
     // Create new fieldset
     if (!$group_fieldset[$group]) { 
       $group_fieldset[$group] = TRUE;
-      $group_title = $group;
-      $group = strtolower(preg_replace('/[^a-zA-Z0-9-]+/', '-', $group_title));
       $form[$group] = array(
         '#type' => 'fieldset',
         '#title' => t($group_title),
         '#collapsible' => TRUE,
         '#collapsed' => TRUE,
       );
-
-      // Add selectors
-      $selector = $subtheme->selectors[$selector_name];
-      $form[$group][$selector->name] = array(
-        '#type' => 'textarea',
-        '#title' => t($selector->title),
-        '#default_value' => $selector->css_properties,
-        '#description' => t('CSS selector: ') . $selector->css_selector .'<br />'. t('default: ') . $default_selectors[$selector->name]->css_properties, 
-      );
     }
+
+    // Add selectors
+    $selector = $subtheme->selectors[$selector_name];
+    $form[$group][$selector->name] = array(
+      '#type' => 'textarea',
+      '#title' => t($selector->title),
+      '#default_value' => $selector->css_properties,
+      '#description' => t('CSS selector: ') . $selector->css_selector .'<br />'. t('default: ') . $default_selectors[$selector->name]->css_properties, 
+    );
   }
 
   // Include files field group for uploading background images
@@ -102,7 +101,6 @@ function subtheme_form() {
     '#type' => 'submit',
     '#value' => t('Save'),
   );
-
   return $form;
 }
 

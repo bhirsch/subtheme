@@ -156,9 +156,10 @@ function subtheme_ctools_export_ui_form(&$form, &$form_state) {
 }
 
 /**
+ * Callback for form validation. 
+ *
  * Process input.
  * 
- *
  * For selectors to be included, check to see if this value
  * has already been included and possibly overridden. (If it show up in 
  * subtheme_get(), it's already included.) If it's newly being 
@@ -171,17 +172,22 @@ function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state)
   $processed_selectors = array();
   $processed_groups = array();
 
-  if (arg(3) == 'add') { // new subtheme
+  // process selectors, new subthemd
+  if (arg(3) == 'add') {
     foreach ($selectors as $selector_name => $include) {
       if ($include) {
-        $processed_selectors[$selector_name] = mtheme_selector_load($selector_name);
+        $selector = mtheme_selector_load($selector_name);
+        $processed_selectors[$selector_name] = $selector;
+        $processed_groups[$selector_name] = $selector->grp;
       } else {
         unset($processed_selectors[$selector_name]);
+        unset($processed_groups[$selector_name]);
       }
     }
-  } 
+  }
 
-  if (arg(5) == 'edit') { // update existing subtheme
+  // process selectors, update existing subtheme
+  if (arg(5) == 'edit') { 
     $subtheme_name = $form_state['values']['name'];
     $subtheme = subtheme_get($subtheme_name);
     $saved_selectors = $subtheme->selectors;
@@ -195,14 +201,17 @@ function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state)
         // New selector being added to existing subtheme.
         $processed_selectors[$selector_name] = mtheme_selector_load($selector_name);
       }
-      // Process groups
-      if ($include) {
-        $processed_groups[$selector_name] = $form_state['values'][$selector_name];
-      } else {
-        unset($processed_groups[$selector_name]);
+      // process groups
+      foreach ($selectors as $selector_name => $include) {
+        if ($include) {
+          $processed_groups[$selector_name] = $form_state['values'][$selector_name];
+        } else {
+          unset($processed_groups[$selector_name]);
+        }
       }
     }
   }
+
 
   $form_state['values']['selectors'] = $processed_selectors;
   $form_state['values']['grps'] = $processed_groups;
@@ -217,4 +226,53 @@ function subtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
   ctools_include('subtheme', 'subtheme'); 
   $subtheme = $form_state['item'];
   subtheme_css($subtheme); 
+}
+
+/**
+ * Callback for delete subtheme form.
+ * 
+ * When a subtheme is deleted or reverted,
+ * delete all the files in 
+ * files/subtheme/mysubtheme/.
+ * Also check to see if deleted subtheme is enabled. 
+ * If it is, disable it.
+ * 
+ * @todo D6 doesn't provide a function for removing directories. 
+ *  Use PHP rmdir. In D7 use FileTransfer::removeDirectoryJailed
+ */
+function subtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state) {
+  $subtheme = $form_state['item'];
+  $name = $subtheme->name;
+  // delete image files 
+  $path = file_directory_path() ."/subtheme/$name/images";  
+  foreach (@file_scan_directory($path, '.*') as $file) {
+    file_delete($file->filename);
+  }
+  if (file_check_directory($path)) {
+    $result = rmdir($path);
+    if ($result) {
+      $txt = $path . t(' deleted.');  
+      drupal_set_message($txt);
+    } else {
+      $txt = $path . t(' could not be deleted.'); 
+    }
+  }
+  // delete style sheet and subtheme directory
+  $path = file_directory_path() ."/subtheme/$name/$name.css";
+  file_delete($path);
+  $path = file_directory_path() ."/subtheme/$name";
+  $result = rmdir($path);
+  if (file_check_directory($path)) {
+    $result = rmdir($path);
+    if ($result) {
+      $txt = $path . t(' deleted.');  
+      drupal_set_message($txt);
+    } else {
+      $txt = $path . t(' could not be deleted.'); 
+    }
+  }
+  // disable subtheme if it's active.
+  if ($subtheme->is_active) {
+    subtheme_deactivate($name);
+  }
 }

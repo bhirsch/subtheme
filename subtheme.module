@@ -7,6 +7,16 @@
  */
 
 /**
+ * Implementation of hook_help()
+ */
+function subtheme_help($path, $arg) {
+  if ($path == 'admin/help#subtheme') {
+    $txt = 'GUI for creating and overriding Subthemes.'; // TODO
+    $output = t($txt);
+    return $output;
+  }
+}
+/**
  * Implementation of hook_menu().
  */
 function subtheme_menu() {
@@ -92,8 +102,7 @@ function subtheme_form_alter(&$form, &$form_state, $form_id) {
     }
   // Modify forms for deleting and reverting subtheme objects
   } else if ($form_id == 'ctools_export_ui_delete_confirm_form' && arg(2) == 'subtheme') {
-    // TODO ADD INCLUDE ctools_include('css', 'subtheme'); // include includes/css.inc
-    // TODO // $form['#submit'][] = 'subtheme_ctools_export_ui_delete_confirm_form_submit';
+    $form['#submit'][] = 'subtheme_ctools_export_ui_delete_confirm_form_submit';
   }
 }
 
@@ -142,6 +151,8 @@ function _subtheme_title_customize_page() {
 /**
  * @param $name
  *  string, subtheme name.
+ * 
+ * @return $subtheme, subtheme object.
  */
 function subtheme_get($name) {
   ctools_include('export');
@@ -194,6 +205,104 @@ function subtheme_admin_options_get() {
 }
 
 /**
+ * @return string, active subtheme name.
+ */
+function subtheme_get_active_subtheme() {
+ return db_result(db_query("SELECT name FROM {subtheme_subtheme} WHERE is_active = 1")); 
+}
+
+/**
+ * Add subtheme css files.
+ */
+function subtheme_add_css() {
+  // Get active subtheme.
+  if ($name = subtheme_get_active_subtheme()) {
+    $subtheme = subtheme_get($name);
+    // Make sure it's not disabled.
+    if(!$subtheme->disabled) {
+      $name = $subtheme->name;
+      // Load style sheet.
+      //   In code only -> load stylesheet from feature module // TODO
+      //   In database -> load stylesheet from files directory // TODO 
+      $stylesheet = file_directory_path() ."/subtheme/$name/$name.css";
+      drupal_add_css($stylesheet, 'theme', 'all', TRUE);
+    }
+  }
+  
+/*
+  $disabled = array();
+  $in_code_only = array();
+  $in_database = array();
+  foreach ($subthemes as $subtheme) {
+    $name = $subtheme->name;
+    if ($subtheme->disabled) { 
+      $disabled[] = $name;
+    }
+    if ($subtheme->in_code_only) {
+      $in_code_only[] = $name;  
+    }
+    if (!in_array($name, $in_code_only)) {
+      $in_database[] = $name; 
+    }
+  }
+     
+  // Load style sheets in code (features modules).
+  $features = features_get_features();
+  foreach ($features as $feature) {
+    // Make sure the feature module is enabled and has subtheme subthemes.
+    if ($feature->info['features']['subtheme_subtheme'] && $feature->status == 1) {
+      $module_name = $feature->name;
+      // Check each subtheme.
+      foreach ($feature->info['features']['subtheme_subtheme'] as $name) {
+        if (!in_array($name, $disabled) && in_array($name, $in_code_only)) {
+          $path = drupal_get_path('module', $module_name);
+          $stylesheet = $path ."/$module_name.$name.css";     // @todo maybe we don't 
+          drupal_add_css($stylesheet, 'theme', 'all', TRUE);  //  need stylesheets in 
+        }                                                     //  .info files anymore?
+      } 
+    }
+  }
+
+  // Load style sheets from files directory (in CSS in database)
+  foreach ($in_database as $name) {
+    if (!in_array($name, $disabled)) {
+      $stylesheet = file_directory_path() ."/subtheme/$name.css";
+      drupal_add_css($stylesheet, 'theme', 'all', TRUE);
+    }  
+  }
+// */ 
+}
+
+/**
+ * Activate subtheme.
+ *
+ * Currently, there can only be one active subtheme at any given point
+ * in time. 
+ * 
+ * @todo Set up subthemes to work more like themes that can be 
+ *  enabled/disabled for different users, organic groups, etc.
+ *
+ * @param $name
+ *  string, subtheme name.
+ */
+function subtheme_activate($name) {
+  // Set active subtheme to inactive.
+  db_query("UPDATE {subtheme_subtheme} SET is_active = 0 WHERE is_active = 1");
+  // Activate selected subtheme.
+  db_query("UPDATE {subtheme_subtheme} SET is_active = 1 WHERE name = '%s' ", $name);
+}
+
+/**
+ * Deactivate subtheme.
+ *
+ * @param $name
+ *  string, subtheme name. 
+ */
+function subtheme_deactivate($name) {
+  db_query("UPDATE {subtheme_subtheme} SET is_active = 0 WHERE name = '%s'", $name);
+}
+
+/**
  * @param $name
  *  string, subtheme name
  *
@@ -213,11 +322,6 @@ function subtheme_admin_options_default_values($name, $options) {
 
   return $default_values;
 }
-
-/**
- *
- */
-function subtheme_admin_options_set($name) {}
 
 
 //--------------------------------------------------/
@@ -304,100 +408,11 @@ function subtheme_subtheme_save(&$myobj) {
 // COPIED FROM MTHEME MODULE BELOW
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
- 
-//--------------------------------//
-// core Drupal hooks              //
-//--------------------------------//
-
-/**
- * Implementation of hook_help()
- */
-function subtheme_help($path, $arg) {
-  if ($path == 'admin/help#subtheme') {
-    $txt = 'Features Control Panel provides a.... [FINISH HELP TEXT] '; // TODO
-    $output = t($txt);
-    return $output;
-  }
-}
- 
-// */
 
 //----------------------------------------------//
 // mtheme                                       //
 //----------------------------------------------//
 
-/**
- * Add subtheme css files.
- *
- * @TODO Find out if Ctools is caching these objects. 
- *  Seems expensive to load them all each time to 
- *  check if enabled features have disabled subthemes. 
- * 
- * Get all subtheme subthemes
- *  
- *  $subthemes
- *     |
- *     |
- *  +--------------+
- *  |              |
- * disabled    (enabled)
- *                 |
- *        +---------------+
- *        |               |
- *  in code only          |
- *                        | 
- *                   in database
- * 
- */
- // TODO replace "subthemes" with "subthemes" and related logic...
-function subtheme_add_css() {
-  // Get subthemes from Ctools.
-  ctools_include('export');
-  $subthemes = ctools_export_load_object('subtheme_subtheme');
-  $subthemes = (array) $subthemes;
-
-  $disabled = array();
-  $in_code_only = array();
-  $in_database = array();
-  foreach ($subthemes as $subtheme) {
-    $name = $subtheme->name;
-    if ($subtheme->disabled) { 
-      $disabled[] = $name;
-    }
-    if ($subtheme->in_code_only) {
-      $in_code_only[] = $name;  
-    }
-    if (!in_array($name, $in_code_only)) {
-      $in_database[] = $name; 
-    }
-  }
-     
-  // Load style sheets in code (features modules).
-  $features = features_get_features();
-  foreach ($features as $feature) {
-    // Make sure the feature module is enabled and has subtheme subthemes.
-    if ($feature->info['features']['subtheme_subtheme'] && $feature->status == 1) {
-      $module_name = $feature->name;
-      // Check each subtheme.
-      foreach ($feature->info['features']['subtheme_subtheme'] as $name) {
-        if (!in_array($name, $disabled) && in_array($name, $in_code_only)) {
-          $path = drupal_get_path('module', $module_name);
-          $stylesheet = $path ."/$module_name.$name.css";     // @todo maybe we don't 
-          drupal_add_css($stylesheet, 'theme', 'all', TRUE);  //  need stylesheets in 
-        }                                                     //  .info files anymore?
-      } 
-    }
-  }
-
-  // Load style sheets from files directory (in CSS in database)
-  foreach ($in_database as $name) {
-    if (!in_array($name, $disabled)) {
-      $stylesheet = file_directory_path() ."/subtheme/$name.css";
-      drupal_add_css($stylesheet, 'theme', 'all', TRUE);
-    }  
-  }
-  
-}
 
 /**
  * @param $subthemes

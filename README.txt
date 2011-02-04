@@ -1,6 +1,19 @@
 Subtheme
 --------
 
+Set-up
+--------
+This only works with the following lines included in template.php:
+
+Note: If you include this snippet in template.php, you don't have 
+to additionally include the snippet from Module Theme's README file.
+
+if (module_exists('mtheme') && module_exists('subtheme')) {
+  mtheme_add_css();  
+  subtheme_add_css();  
+}
+
+
 File structure
 ---------------
 files/subtheme/subtheme_name/subtheme_name.css
