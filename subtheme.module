@@ -431,6 +431,8 @@ function subtheme_subtheme_features_export($data, &$export, $module_name) {
     // @todo for some reason features components need associative arrays
     // to come out right in the .info file. Stylesheet components 
     // seem to need numerical arrays.  
+// CONTINUE HERE
+// TODO Fix style sheet paths
     $export['stylesheets']['all'][] = $module_name .'.'. $component .'.css'; 
   }
   return array();
@@ -445,25 +447,24 @@ function subtheme_subtheme_features_export($data, &$export, $module_name) {
 function subtheme_features_files($export, $module_name) {
   $add_files = array();
   if ($subtheme_subthemes = $export['features']['subtheme_subtheme']) {
-    // Get css files for each component. 
+    // Get css files for each subtheme. (Multiple subthemes can be exported at once). 
     $i = 0;
-    $subtheme_path = file_directory_path() .'/subtheme';
     foreach ($subtheme_subthemes as $name) {
+      $subtheme_path = file_directory_path() ."/subtheme/$name";
       // Get subtheme's CSS file
       $add_files[$i]->name = $module_name .'.'. $name;
       $add_files[$i]->basename = $module_name .'.'. $name .'.css'; 
-      $add_files[$i]->filename = $subtheme_path .'/'. $name .'.css';
-      $add_files[$i]->subdir = '';
-      // TODO Check for images.
-      $images_path = $subtheme_path .'/images/'. $name;
+      $add_files[$i]->filename = $subtheme_path ."/$name.css";
+      $add_files[$i]->subdir = "subtheme/$module_name.$name";
+      // Check for images.
+      $images_path = $subtheme_path .'/images';
       foreach (@file_scan_directory($images_path, '.*') as $file) {
         $i++;
         $add_files[$i]->name = $file->name;
         $add_files[$i]->basename = $file->basename;
         $add_files[$i]->filename = $file->filename;
-        $add_files[$i]->subdir = 'images/'. $name;
+        $add_files[$i]->subdir = "subtheme/$module_name.$name/images";
       }
-      // TODO Step 6. Update theme.module and try it for real.
       $i++;
     }
   }
