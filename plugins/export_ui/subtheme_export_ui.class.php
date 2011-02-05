@@ -1,20 +1,9 @@
 <?php
 /**
- * CTools export UI extending class. Slightly customized for Context.
+ * CTools export UI extending class. 
  *
  */
 class subtheme_export_ui extends ctools_export_ui {
-  /*
-  function list_form(&$form, &$form_state) {
-    parent::list_form($form, $form_state);
-    $form['top row']['submit'] = $form['bottom row']['submit'];
-    $form['top row']['reset'] = $form['bottom row']['reset'];
-    $form['bottom row']['#access'] = FALSE;
-    // Invalidate the context cache.
-    context_invalidate_cache();
-    return;
-  }
-  // */
 
   function list_css() {
     ctools_add_css('export-ui-list');
@@ -22,23 +11,26 @@ class subtheme_export_ui extends ctools_export_ui {
   }
 
   function list_render(&$form_state) {
-    return theme('table', $this->list_table_header(), $this->rows, array('class' => 'subtheme-admin', 'id' => 'ctools-export-ui-list-items'));
+$list_header = $this->list_table_header();
+$title = array(array('data' => 'Title', 'class' => 'ctools-export-ui-name'));
+$list_header = array_merge($title, $list_header);
+
+    return theme('table', $list_header, $this->rows, array('class' => 'subtheme-admin', 'id' => 'ctools-export-ui-list-items'));
   }
 
   function list_build_row($item, &$form_state, $operations) {
     $name = $item->name;
 
-    // Add a row for groups (feature sets, "tags" in context module).
-    $group = !empty($item->grp) ? $item->grp : t('< No Group >');
-    if (!isset($this->rows[$group])) {
-      $this->rows[$group]['data'] = array();
-      $this->rows[$group]['data'][] = array('data' => check_plain($group), 'colspan' => 3, 'class' => 'group');
-      $this->sorts["{$group}"] = $group;
-    }
-
-    // Build row for each context item.
+    // Build row for each item.
     $this->rows["{$group}:{$name}"]['data'] = array();
     $this->rows["{$group}:{$name}"]['class'] = !empty($item->disabled) ? 'ctools-export-ui-disabled' : 'ctools-export-ui-enabled';
+
+    $this->rows["{$group}:{$name}"]['data'][] = array(
+      'data' => check_plain($item->title),
+      'class' => 'ctools-export-ui-title'
+    );
+    // */
+
     $this->rows["{$group}:{$name}"]['data'][] = array(
       'data' => check_plain($name) . "<div class='description'>" . check_plain($item->description) . "</div>",
       'class' => 'ctools-export-ui-name'
@@ -56,17 +48,6 @@ class subtheme_export_ui extends ctools_export_ui {
     $this->sorts["{$group}:{$name}"] = $group . $name;
   }
   
-  /**
-   * Override of edit_form_submit().
-   * Don't copy values from $form_state['values'].
-   */
-  /*
-  function edit_form_submit(&$form, &$form_state) {
-    if (!empty($this->plugin['form']['submit'])) {
-      $this->plugin['form']['submit']($form, $form_state);
-    }
-  }
-  // */
 }
 
 
