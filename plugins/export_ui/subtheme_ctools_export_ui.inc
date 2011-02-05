@@ -80,14 +80,13 @@ function subtheme_ctools_export_ui_form(&$form, &$form_state) {
     $subtheme = subtheme_get(arg(4));
     $selectors = $subtheme->selectors;
     $grps = $subtheme->grps;
-    $groups = array(); // array( $selector_name => $group_name )
     // Organize included selectors by group
     foreach ($selectors as $selector) {
       $groups[$selector->name] = $grps[$selector->name];
     } 
     // Organize selectors by group
-    asort($groups);
-    foreach ($groups as $selector => $group) {
+    asort($grps);
+    foreach ($grps as $selector => $group) {
       $form[$selector] = array(
         '#type' => 'textfield',
         '#title' => $options[$selector],
