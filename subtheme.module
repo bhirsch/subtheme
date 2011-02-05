@@ -234,9 +234,21 @@ function subtheme_add_css() {
   // Get active subtheme.
   if ($name = subtheme_get_active_subtheme()) {
     $subtheme = subtheme_get($name);
-dsm($subtheme);
-    // Make sure it's not disabled.
-    if(!$subtheme->disabled) {
+//dsm($name); 
+//dsm($subtheme); 
+    // It's not disabled and it's stored in code.
+    if(!$subtheme->disabled && $subtheme->in_code_only) {
+      // Get info about the features module that has the active subtheme.
+      $feature = subtheme_get_feature($name);
+      if ($feature->status == 1) { // Make sure feature is enabled.
+        $module_name = $feature->name;
+        $path = drupal_get_path('module', $module_name);
+        $stylesheet = $path ."/subtheme/$module_name.$name/$module_name.$name.css";
+        drupal_add_css($stylesheet, 'theme', 'all', TRUE); 
+      }
+    }
+    // It's not disabled and it's not in code only.
+    else if(!$subtheme->disabled && !$subtheme->in_code_only) {
       $name = $subtheme->name;
       // Load style sheet.
       //   In code only -> load stylesheet from feature module // TODO
@@ -291,6 +303,36 @@ dsm($subtheme);
 }
 
 /**
+ * @param $name
+ *  string, subtheme name
+ * 
+ * @return $feature
+ *  object, results of features_get_feature($name) for the 
+ *  feature module that stores the subtheme requested.
+ * 
+ * @todo cache info about which subtheme is stored in which
+ *     module so we don't have to load all these features 
+ *     modules here.
+ */
+function subtheme_get_feature($name) {
+  $features = features_get_features();
+  $feature_with_subtheme = '';
+
+  foreach ($features as $feature) {
+    // Check for subthemes.
+    if ($feature->info['features']['subtheme_subtheme']) {
+      foreach ($feature->info['features']['subtheme_subtheme'] as $subtheme_name) {
+        if ($subtheme_name == $name) {
+          $feature_with_subtheme = $feature;  
+        }
+      }
+    }
+  }
+ 
+  return $feature_with_subtheme;
+}
+
+/**
  * Activate subtheme.
  *
  * Currently, there can only be one active subtheme at any given point
@@ -313,9 +355,32 @@ function subtheme_activate($name) {
       // Activate selected subtheme.
       $subtheme->is_active = TRUE;
       subtheme_save($subtheme);
+      // If module being activated is in code only
+      // copy images and CSS to files/subtheme directory.
+      // Activating a subtheme that defaults to not active
+      // makes it "overridden".
+      if ($subtheme->in_code_only) {
+        // Re-write CSS.
+        ctools_include('subtheme', 'subtheme'); 
+        subtheme_css($subtheme); 
+        // Copy images.
+        $feature = subtheme_get_feature($name);
+        $module_name = $feature->name;
+        $module_path = drupal_get_path('module', $module_name);
+        $images_path = $module_path ."/subtheme/$module_name.$name/images";
+        $new_images_path = file_directory_path() ."/subtheme/$name/images";
+        //$new_images_path = file_directory_path() ."/subtheme/$name";
+        file_check_directory($new_images_path, FILE_CREATE_DIRECTORY);
+        foreach (@file_scan_directory($images_path, '.*') as $file) {
+          $file_path = $new_images_path ."/". $file->basename;
+          file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
+          //if ($contents = file_get_contents($file->filename) {
+            //file_put_contents(   
+          //}
+        }
+      }
     }
   }
-
 }
 
 /**
