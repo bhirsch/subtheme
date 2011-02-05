@@ -43,7 +43,7 @@ function subtheme_menu() {
   );
   $items['admin/build/subtheme/customize'] = array(
     'title' => t('Customize'), 
-    'description' => t('Customize subthemes'),
+    'description' => t('Customize Style Sheet'),
     'page callback' => 'subtheme_customize_page',
     'access arguments' => array('manage subtheme'), 
     'type' => MENU_LOCAL_TASK,
@@ -54,7 +54,7 @@ function subtheme_menu() {
     'title callback' => '_subtheme_title_customize_page',
     //'title arguments' => array(arg(4)),
     //'title' => t('Customize Subtheme'), 
-    'description' => t('Customize Subtheme'),
+    'description' => t('Customize Subtheme Styles'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('subtheme_form'),
     'access arguments' => array('manage subtheme'), 
@@ -143,7 +143,7 @@ function theme_subtheme_options_details($selector) {
 
 function _subtheme_title_customize_page() {
   $name = arg(4);
-  $title = t('Customize Subtheme: '); 
+  $title = t('Customize Style Sheet: '); 
   $title .= t(subtheme_get_title($name));
   return $title;
 }
