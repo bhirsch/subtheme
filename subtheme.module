@@ -403,69 +403,6 @@ function subtheme_subtheme_save(&$myobj) {
       return drupal_write_record('subtheme_subtheme', $myobj, $update);
 }
 
-
-/////////////////////////////////////////////////////////////////////////////////////////////////
-// COPIED FROM MTHEME MODULE BELOW
-///////////////////////////////////////////////////////////////////////////////////////////////
-
-
-//----------------------------------------------//
-// mtheme                                       //
-//----------------------------------------------//
-
-
-/**
- * @param $subthemes
- *  array, optionally save subtheme_get_groups the work of calling
- *  ctools_export_load_object.
- * 
- * @return $groups
- *  array, subthemes organized by group 
- *
- * $groups[$i]['group_name'] = $group_name
- * $groups[$i]['group_title'] = $group_title; 
- * $groups[$i]['subthemes'][$subtheme]
- */
- // TODO replace "subthemes" with "subthemes" and related logic
-function subtheme_get_groups($subthemes = NULL) {
-  ctools_include('export');
-  if (!$subthemes) {
-    $subthemes = ctools_export_load_object('subtheme_subtheme');
-  } 
-  if ($subthemes) {
-    // Make a unique list of groups;
-    foreach($subthemes as $subtheme) {
-      $group_title = $subtheme->grp;
-      $group = strtolower(preg_replace('/[^a-zA-Z0-9-]+/', '-', $group_title));
-      $list[$group] = $group_title;
-    }
-    // Sort group list in alphabetical order by $group_title.
-    asort($list);
-    // Number groups.
-    $groups = array();
-    $i = 0;
-    foreach($list as $group => $group_title) {
-      $groups[$i]['group_name'] = $group;
-      $groups[$i]['group_title'] = $group_title;
-      // Organize subthemes by group.
-      foreach($subthemes as $subtheme) {
-        if($subtheme->grp == $group_title) {
-          $groups[$i]['subthemes'][] = $subtheme;
-        } 
-      }
-      // default, sort alphabetical (handle sort by weight elsewhere)
-      sort($groups[$i]['subthemes']);
-      $i++;
-    }
-    
-    return $groups;
-  } else {
-    return FALSE;
-  }
-}
-
-
-
 //-------------------------------------------------/
 // Features hooks                                  /
 //-------------------------------------------------/
