@@ -35,6 +35,12 @@ function subtheme_form() {
   $subtheme = subtheme_get($name);
   $default_selectors = mtheme_get_selectors();
 
+  $form['stylesheet'] = array(
+    '#type' => 'item',
+    '#title' => 'Style Sheet',
+    '#value' => l("$name.css", file_directory_path() ."/subtheme/$name/$name.css"),
+  );
+
   // Organize by groups
   $groups = $subtheme->grps;
   asort($groups);
@@ -58,7 +64,7 @@ function subtheme_form() {
     $selector = $subtheme->selectors[$selector_name];
     $form[$group][$selector->name] = array(
       '#type' => 'textarea',
-      '#title' => t($selector->title),
+      '#title' => t($selector->title) . " ($selector->css_selector)",
       '#default_value' => $selector->css_properties,
       '#description' => t('CSS selector: ') . $selector->css_selector .'<br />'. t('default: ') . $default_selectors[$selector->name]->css_properties, 
     );
