@@ -8,11 +8,20 @@
  */
 function subtheme_activation_form() {
   $subthemes = subtheme_get_subthemes();
+
+  $options = _subtheme_options($subthemes);
+  $options['disabled'] = t('(No active subtheme)');
+
+  $default = subtheme_get_active_subtheme();
+  if (!$default) {
+    $default = 'disabled';  
+  }
+
   $form['activate'] = array(
     '#type' => 'radios',
     '#title' => t('Activate a subtheme by making a selection here'),
-    '#options' => _subtheme_options($subthemes),
-    '#default_value' => subtheme_get_active_subtheme(),
+    '#options' => $options,
+    '#default_value' => $default,
   );  
   $form['submit'] = array(
     '#type' => 'submit', 
@@ -39,6 +48,7 @@ function _subtheme_options($subthemes) {
   foreach ($subthemes as $subtheme) {
     $options[$subtheme->name] = $subtheme->title;
   }
+  asort($options);
 
   return $options;
 }

@@ -15,9 +15,12 @@ function subtheme_customize_page() {
 
   return $output;
 }
-
+/**
+ * Theme links.
+ */
 function theme_subtheme_customize_links($subthemes) {
   $output = '';
+  ksort($subthemes); // Sort alphabetically for consistency.
   foreach ($subthemes as $subtheme) {
     $path = 'admin/build/subtheme/customize/'. $subtheme->name;
     $link =  l(t($subtheme->title), $path);  
@@ -136,15 +139,6 @@ function subtheme_form_submit(&$form, &$form_state) {
   subtheme_save($subtheme);
   ctools_include('subtheme', 'subtheme');
   subtheme_css($subtheme);
-}
-/**
- * Wrapper function for subtheme_subtheme_save($subtheme).
- * 
- * Original function is a Ctools hook: 
- * mymodule_myobj_save($obj). This is just shorter and sweeter.
- */
-function subtheme_save($subtheme) {
-  subtheme_subtheme_save($subtheme);  
 }
 
 /**
