@@ -431,9 +431,7 @@ function subtheme_subtheme_features_export($data, &$export, $module_name) {
     // @todo for some reason features components need associative arrays
     // to come out right in the .info file. Stylesheet components 
     // seem to need numerical arrays.  
-// CONTINUE HERE
-// TODO Fix style sheet paths
-    $export['stylesheets']['all'][] = $module_name .'.'. $component .'.css'; 
+    $export['stylesheets']['all'][] = "subtheme/$module_name.$component/$component.css";
   }
   return array();
 }
@@ -478,59 +476,17 @@ function subtheme_features_files($export, $module_name) {
  */
 /*
 function subtheme_subtheme_features_export_render($module_name, $data, $export = NULL) {
-  $render = array();
-
-  // @todo D7 upgrade:
-  // Include implementation of hook_enable to re-write CSS.
-  // This will not be necessary in D7. subtheme will be able to call 
-  // hook_modules_enabled() to listen for events like this. 
-  $code = array();
-  $code = '  subtheme_css(); // rewrite files/subtheme/subtheme.css when module is enabled'; 
-  $render['enable'] = $code;
-
-  // @todo D7 upgrade:
-  // Include implementation of hook_disable to re-write CSS.
-  // This will not be necessary in D7. subtheme will be able to call 
-  // hook_modules_enabled() to listen for events like this. 
-  $code = array();
-  $code = '  subtheme_css(); // rewrite files/subtheme/subtheme.css when module is enabled'; 
-  $render['disable'] = $code;
-
-  // This writes implementation of hook_default_subtheme_subtheme just as features/ctools
-  // would do if there were no implementation of hook_features_export render here.
-  $code = array();
-  $code[] = '$export = array();';
-  foreach ($data as $name) {
-    $subtheme = subtheme_subtheme_load($name);
-    $code[] = subtheme_subtheme_export($subtheme);
-    $code[] = "  \$export['{$name}'] = \$subtheme;";
-  }
-  $code[] = '  return $export;';
-  $code = implode("\n", $code);
-  $render['default_subtheme_subtheme'] = $code;
-
-  return $render;
 }
 // */
 
 /**
  * Implementation of hook_features_export_options().
  */
-// TODO 
-
 /**
  * Implementation of hook_features_revert().
  */
 /*
 function subtheme_features_export_revert($module_name) {
-print("subtheme_features_export_revert here: \n");
-print_r($module_name, TRUE);
-  $mycomponents = module_invoke_all($module_name, 'subtheme_defaults');
-  if (!empty($$mycomponents)) {
-    foreach ($mycomponents as $mycomponent) {
-      mycomponent_delete($mycomponent);
-    }
-  }
 }
 // */
 

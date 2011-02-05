@@ -197,8 +197,10 @@ function subtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_sta
   $name = $subtheme->name;
   // delete image files 
   $path = file_directory_path() ."/subtheme/$name/images";  
-  foreach (@file_scan_directory($path, '.*') as $file) {
-    file_delete($file->filename);
+  if (file_check_directory($path)) {
+    foreach (@file_scan_directory($path, '.*') as $file) {
+      file_delete($file->filename);
+    }
   }
   if (file_check_directory($path)) {
     $result = rmdir($path);
@@ -213,7 +215,9 @@ function subtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_sta
   $path = file_directory_path() ."/subtheme/$name/$name.css";
   file_delete($path);
   $path = file_directory_path() ."/subtheme/$name";
-  $result = rmdir($path);
+  if (file_check_directory($path)) {
+    $result = rmdir($path);
+  }
   if (file_check_directory($path)) {
     $result = rmdir($path);
     if ($result) {
