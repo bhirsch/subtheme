@@ -83,6 +83,10 @@ function subtheme_theme() {
     'subtheme_customize_links' => array(
       'arguments' => array('subthemes' => NULL),
     ),
+    'subtheme_activate_options' => array(
+      'arguments' => array('subtheme' => NULL),
+      'file' => 'includes/subtheme.activate.inc',
+    ),
   );  
 }
 
