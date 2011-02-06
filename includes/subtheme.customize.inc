@@ -19,12 +19,19 @@ function subtheme_customize_page() {
  * Theme links.
  */
 function theme_subtheme_customize_links($subthemes) {
+  $path = drupal_get_path('module', 'subtheme') .'/subtheme.css';
+  drupal_add_css($path);
+
   $output = '';
   ksort($subthemes); // Sort alphabetically for consistency.
   foreach ($subthemes as $subtheme) {
     $path = 'admin/build/subtheme/customize/'. $subtheme->name;
-    $link =  l(t($subtheme->title), $path);  
-    $output .= '<div class="subtheme-customize-link subtheme">'. $link .'</div>';
+    $link =  l(t(check_plain($subtheme->title)), $path);  
+
+    $output .= '<div class="subtheme subtheme-admin-customize">';
+      $output .= '<div class="subtheme-customize-link">'. $link .'</div>';
+      $output .= '<div class="subtheme-customize-description">'. check_plain($subtheme->description) .'</div>';
+    $output .= '</div>';
   }
     
   return $output;
