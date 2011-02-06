@@ -11,9 +11,9 @@ class subtheme_export_ui extends ctools_export_ui {
   }
 
   function list_render(&$form_state) {
-$list_header = $this->list_table_header();
-$title = array(array('data' => 'Title', 'class' => 'ctools-export-ui-name'));
-$list_header = array_merge($title, $list_header);
+    $list_header = $this->list_table_header();
+    $title = array(array('data' => 'Title', 'class' => 'ctools-export-ui-name'));
+    $list_header = array_merge($title, $list_header);
 
     return theme('table', $list_header, $this->rows, array('class' => 'subtheme-admin', 'id' => 'ctools-export-ui-list-items'));
   }

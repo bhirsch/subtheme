@@ -112,27 +112,20 @@ function subtheme_form_alter(&$form, &$form_state, $form_id) {
  * on the admin/build/subtheme/add and /edit forms.
  */
 function theme_subtheme_options_details($selector) {
-  /*
-    $path = drupal_get_path('module', 'subtheme') .'/subtheme.css';
-    drupal_add_css($path);
-
-     $output = '';
-     $output .= "<div class='subtheme subtheme-options-details'>";
-       $output .= "<div class='subtheme-options-title'>". t($selector->title) ."</div>";
-       $output .= "<div class='subtheme-options-name'>". $selector->name ."</div>";
-       $output .= "<div class='subtheme-options-selector'>". $selector->css_selector ."</div>";
-       $output .= "<div class='subtheme-options-description'>". $selector->description ."</div>";
-       //$output .= "<div class='subtheme-options-css'>". ."</div>";
-     $output .= "</div>";
-  // */
+  $path = drupal_get_path('module', 'subtheme') .'/subtheme.css';
+  drupal_add_css($path);
 
    $output = '';
-   $output .= t($selector->title);
-   $output .= ', '. $selector->name;
-   $output .= ' ('.  $selector->css_selector .')';
-   if ($selector->disabled) {
-     $output .= ' '. t('DISABLED');   
-   }
+   $output .= '<div class="subtheme-admin-css-selector">';
+     $output .= '<div>';
+       $output .= '/*** '. t($selector->title) .', '. $selector->name .' ';
+       if ($selector->disabled) {
+         $output .= ' '. t('(DISABLED) ');   
+       }
+       $output .= ' ***/';
+     $output .= '</div>';
+     $output .= '<div>'.  $selector->css_selector .'</div>';
+   $output .= '</div>';
 
    return $output;
 }

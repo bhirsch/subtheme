@@ -76,6 +76,9 @@ function subtheme_ctools_export_ui_form(&$form, &$form_state) {
     $form['groups'] = array(
       '#type' => 'item',
       '#title' => t('Organize included selectors into groups'),
+      '#value' => t('Selectors with the same group name will '
+                   .'be "grouped" together on the Customize form and '
+                   .'in CSS comments.'),
     );
     $subtheme = subtheme_get(arg(4));
     $selectors = $subtheme->selectors;
@@ -89,7 +92,7 @@ function subtheme_ctools_export_ui_form(&$form, &$form_state) {
     foreach ($grps as $selector => $group) {
       $form[$selector] = array(
         '#type' => 'textfield',
-        '#title' => $options[$selector],
+        '#title' => $selector,
         '#default_value' => $group, 
         '#required' => TRUE,
       );
