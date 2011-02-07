@@ -87,6 +87,10 @@ function subtheme_theme() {
       'arguments' => array('subtheme' => NULL),
       'file' => 'includes/subtheme.activate.inc',
     ),
+    'subtheme_activate' => array(
+      'arguments' => array('form' => NULL),
+      'file' => 'includes/subtheme.activate.inc',
+    ),
   );  
 }
 
@@ -94,6 +98,7 @@ function subtheme_theme() {
  * Implementation of hook_form_alter().
  */
 function subtheme_form_alter(&$form, &$form_state, $form_id) {
+//dsm($form_id);
   // Modify forms for adding and editing subtheme objects
   if ($form_id == 'ctools_export_ui_edit_item_form' && arg(2) == 'subtheme') { 
     // admin/build/subtheme/add
