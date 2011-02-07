@@ -74,7 +74,11 @@ function subtheme_form() {
     $selector = $subtheme->selectors[$selector_name];
     $form[$group][$selector->name] = array(
       '#type' => 'textarea',
-      '#title' => t($selector->title) . " ($selector->css_selector)",
+      //'#title' => t(check_plain($selector->css_selector)) . ' (' . check_plain($selector->title) .', '. check_plain($selector->name) .')',
+      //'#title' => t(check_plain($selector->css_selector)) . ' /*** ' . check_plain($selector->title) .', '. check_plain($selector->name) .' ***/',
+      //'#title' => '/*** ' . check_plain($selector->title) .', '. check_plain($selector->name) .' ***/<br/>'. t(check_plain($selector->css_selector)),
+      '#title' => '/*** ' . check_plain($selector->title) .' ***/<br/>'. t(check_plain($selector->css_selector)),
+      //'#title' => t($selector->title) . " ($selector->css_selector)",
       '#default_value' => $selector->css_properties,
       '#description' => t('CSS selector: ') . $selector->css_selector .'<br />'. t('default: ') . $default_selectors[$selector->name]->css_properties, 
     );
