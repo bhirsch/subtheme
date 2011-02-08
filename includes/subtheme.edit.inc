@@ -41,16 +41,11 @@ function subtheme_form() {
     $selector = $subtheme->selectors[$selector_name];
     $form[$group][$selector->name] = array(
       '#type' => 'textarea',
-      //'#title' => t(check_plain($selector->css_selector)) . ' (' . check_plain($selector->title) .', '. check_plain($selector->name) .')',
-      //'#title' => t(check_plain($selector->css_selector)) . ' /*** ' . check_plain($selector->title) .', '. check_plain($selector->name) .' ***/',
-      //'#title' => '/*** ' . check_plain($selector->title) .', '. check_plain($selector->name) .' ***/<br/>'. t(check_plain($selector->css_selector)),
       '#title' => '/*** ' . check_plain($selector->title) .' ***/<br/>'. t(check_plain($selector->css_selector)),
-      //'#title' => t($selector->title) . " ($selector->css_selector)",
       '#default_value' => $selector->css_properties,
       '#description' => t('CSS selector: ') . $selector->css_selector .'<br />'. t('default: ') . $default_selectors[$selector->name]->css_properties, 
     );
   }
-
   // Include files field group for uploading background images
   // Include enctype, otherwise uploads won't work!
   $form['#attributes'] = array('enctype' => 'multipart/form-data');
@@ -68,7 +63,8 @@ function subtheme_form() {
   );
   // Check for available files
   $name = arg(4);
-  $path = file_directory_path() .'/subtheme/'. $name .'/images';  
+  // If in code only, look in features module.
+  $path = subtheme_images_path($subtheme);
   $i = 0; // Use counter in case of conflicting $file->name values
   foreach (@file_scan_directory($path, '.*') as $file) {
     $title = "images/$file->basename";
@@ -84,6 +80,12 @@ function subtheme_form() {
     );
     $i++; 
   }
+  // Keep track of whether the subtheme was in code only when form 
+  // was built.
+  $form['in_code_only'] = array(
+    '#type' => 'hidden',
+    '#value' => $subtheme->in_code_only,
+  );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
@@ -108,6 +110,7 @@ function subtheme_form() {
 function subtheme_form_submit(&$form, &$form_state) {
   $name = arg(4);
   $subtheme = subtheme_get($name);
+  $in_code_only = $form_state['values']['in_code_only'];
 
   $values = $form_state['values'];
   foreach ($values as $selector_name => $css_properties) {
@@ -117,6 +120,9 @@ function subtheme_form_submit(&$form, &$form_state) {
   subtheme_save($subtheme);
   ctools_include('subtheme', 'subtheme');
   subtheme_css($subtheme);
+  if ($in_code_only) {
+    subtheme_copy_files($subtheme);
+  }
 }
 
 /**

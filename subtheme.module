@@ -351,24 +351,74 @@ function subtheme_activate($name) {
         // Re-write CSS.
         ctools_include('subtheme', 'subtheme'); 
         subtheme_css($subtheme); 
-        // Copy images.
-        $feature = subtheme_get_feature($name);
-        $module_name = $feature->name;
-        $module_path = drupal_get_path('module', $module_name);
-        $images_path = $module_path ."/subtheme/$module_name.$name/images";
-        $new_images_path = file_directory_path() ."/subtheme/$name/images";
-        //$new_images_path = file_directory_path() ."/subtheme/$name";
-        file_check_directory($new_images_path, FILE_CREATE_DIRECTORY);
-        foreach (@file_scan_directory($images_path, '.*') as $file) {
-          $file_path = $new_images_path ."/". $file->basename;
-          file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
-          //if ($contents = file_get_contents($file->filename) {
-            //file_put_contents(   
-          //}
-        }
+        // Copy image files
+        subtheme_copy_files($subtheme); // @todo add error handling
       }
     }
   }
+}
+
+/**
+ * When a subtheme stored in code is modified through Drupal's GUI
+ * (a subtheme that is disabled by default becomes enabled,
+ * someone changes the text's color, etc.), copy all the files
+ * from the subtheme's features module into the files directory,
+ * otherwise relative links to background images will break when 
+ * the new CSS file is written in the files/subtheme/subtheme_name 
+ * directory.
+ * 
+ * @param $subtheme
+ *  object, subtheme_subtheme object.
+ */
+function subtheme_copy_files($subtheme) {
+  $name = $subtheme->name;
+  // Copy images.
+  $images_path = subtheme_images_path($subtheme); 
+  $new_images_path = file_directory_path() ."/subtheme/$name/images";
+  //$new_images_path = file_directory_path() ."/subtheme/$name";
+  file_check_directory($new_images_path, FILE_CREATE_DIRECTORY);
+  foreach (@file_scan_directory($images_path, '.*') as $file) {
+    $file_path = $new_images_path ."/". $file->basename;
+    file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
+  }
+  // return ? // @todo Add error handling. Notify user if unsuccessful? 
+              //       These file functions do a pretty good job notifying 
+              //       administrators about errors,
+              //       still it seems like there should be something
+              //       subtheme-specific here. 
+}
+
+/**
+ * Find the path to the subtheme's images directory.
+ * 
+ * If no status is passed, assume we're finding out the
+ * current images file location. (If the subtheme is in code only, 
+ * the images directory lives in a features module. Otherwise, the 
+ * images directory lives in files/subtheme/subtheme_name/images.
+ * If a status is passed, return the requested path (for an images directory
+ * when in code only, or an images directory in the files directory).
+ * 
+ * @param $subtheme
+ *  object, subtheme_subtheme object. 
+ * 
+ * @param $status
+ *  string, 'in code only' OR 'files'
+ * 
+ * @return
+ *  string, path/to/images/directory.
+ */
+function subtheme_images_path($subtheme, $status = FALSE) {
+  $name = $subtheme->name;
+  if ($subtheme->in_code_only || $status == 'in code only') {
+    $feature = subtheme_get_feature($name);
+    $module_name = $feature->name;
+    $module_path = drupal_get_path('module', $module_name);
+    $path = $module_path ."/subtheme/$module_name.$name/images";
+  } else {
+    $path = file_directory_path() .'/subtheme/'. $name .'/images';  
+  }
+
+  return $path;
 }
 
 /**

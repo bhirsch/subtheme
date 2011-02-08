@@ -179,7 +179,7 @@ function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state)
 function subtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
   ctools_include('subtheme', 'subtheme'); 
   $subtheme = $form_state['item'];
-  subtheme_css($subtheme); 
+  subtheme_css($subtheme);  
 }
 
 /**
