@@ -59,7 +59,7 @@ function theme_subtheme_activate($form) {
 //    $checked = ($name == 'red') ? 'checked="checked" ' : '';
     $checked = ($default == $name) ? 'checked="checked" ' : '';
     $description = t(check_plain($form['activate']['#options'][$name]->description));
-    $edit_link = l(t('Edit'), "admin/build/subtheme/edit/$name");
+    $edit_link = ($name == 'disabled') ? '' : l(t('Edit'), "admin/build/subtheme/edit/$name");
     $title = ($name == 'disabled') ? t('No active subtheme') : $title;
     $output .=   '<tr class="'. $zebra .'" >';
     $output .=     "<td>"
