@@ -104,6 +104,7 @@ function subtheme_ctools_export_ui_form(&$form, &$form_state) {
       '#value' => t('Click Save and then Edit to customize groups here.'),
     );
   }
+dsm($form);
 }
 
 /**
@@ -141,6 +142,7 @@ function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state)
   }
 
   // process selectors, update existing subtheme
+// TODO handle 'clone' here? 
   if (arg(5) == 'edit') { 
     $subtheme_name = $form_state['values']['name'];
     $subtheme = subtheme_get($subtheme_name);
@@ -151,14 +153,20 @@ function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state)
       } else if ($include && array_key_exists($selector_name, $saved_selectors)) {
         // Store already-saved value, in case user has made changes.
         $processed_selectors[$selector_name] = $saved_selectors[$selector_name];
+// TODO HOW DOES A SUBTHEME GET MODIFIED HERE? 
+//      I THINK IT WORKS. MAYBE "SAVED SELECTORS" IS JUST A BAD NAME. TEST THIS.
       } else if ($include && !array_key_exists($selector_name, $saved_selectors)) {
         // New selector being added to existing subtheme.
         $processed_selectors[$selector_name] = mtheme_selector_load($selector_name);
       }
-      // process groups
+      // process groups. every selector needs a group.
       foreach ($selectors as $selector_name => $include) {
-        if ($include) {
-          $processed_groups[$selector_name] = $form_state['values'][$selector_name];
+        if ($include && array_key_exists($selector_name, $saved_selectors)) {
+          // Store user-defined group.
+          $processed_groups[$selector_name] = $form_state['values'][$selector_name]; 
+        } else if ($include && !array_key_exists($selector_name, $saved_selectors)) {
+          // New selector being added to existing subtheme. Store default (mtheme_selector) group.
+          $processed_groups[$selector_name] = $processed_selectors[$selector_name]->grp;
         } else {
           unset($processed_groups[$selector_name]);
         }
