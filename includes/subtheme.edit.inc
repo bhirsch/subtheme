@@ -63,8 +63,7 @@ function subtheme_form() {
   );
   // Check for available files
   $name = arg(4);
-  // If in code only, look in features module.
-  $path = subtheme_images_path($subtheme);
+  $path = subtheme_images_path($subtheme); //Path to files dir or features module w files.
   $i = 0; // Use counter in case of conflicting $file->name values
   foreach (@file_scan_directory($path, '.*') as $file) {
     $title = "images/$file->basename";

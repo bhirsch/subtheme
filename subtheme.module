@@ -373,9 +373,8 @@ function subtheme_activate($name) {
 function subtheme_copy_files($subtheme) {
   $name = $subtheme->name;
   // Copy images.
-  $images_path = subtheme_images_path($subtheme); 
-  $new_images_path = file_directory_path() ."/subtheme/$name/images";
-  //$new_images_path = file_directory_path() ."/subtheme/$name";
+  $images_path = subtheme_images_path($subtheme, 'in code only'); 
+  $new_images_path = subtheme_images_path($subtheme, 'files'); 
   file_check_directory($new_images_path, FILE_CREATE_DIRECTORY);
   foreach (@file_scan_directory($images_path, '.*') as $file) {
     $file_path = $new_images_path ."/". $file->basename;
@@ -409,12 +408,12 @@ function subtheme_copy_files($subtheme) {
  */
 function subtheme_images_path($subtheme, $status = FALSE) {
   $name = $subtheme->name;
-  if ($subtheme->in_code_only || $status == 'in code only') {
+  if (!$status && $subtheme->in_code_only || $status == 'in code only') { 
     $feature = subtheme_get_feature($name);
     $module_name = $feature->name;
     $module_path = drupal_get_path('module', $module_name);
     $path = $module_path ."/subtheme/$module_name.$name/images";
-  } else {
+  } else { // images aren't stored in a features module, or $status == 'files' 
     $path = file_directory_path() .'/subtheme/'. $name .'/images';  
   }
 
