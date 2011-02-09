@@ -255,27 +255,9 @@ function subtheme_get_active_subtheme() {
  * Add subtheme css files.
  */
 function subtheme_add_css() {
-  // Get active subtheme.
-  if ($name = subtheme_get_active_subtheme()) {
-    $subtheme = subtheme_get($name);
-    // It's not disabled and it's stored in code.
-    if(!$subtheme->disabled && $subtheme->in_code_only) {
-      // Get info about the features module that has the active subtheme.
-      $feature = subtheme_get_feature($name);
-      if ($feature->status == 1) { // Make sure feature is enabled.
-        $module_name = $feature->name;
-        $path = drupal_get_path('module', $module_name);
-        $stylesheet = $path ."/subtheme/$module_name.$name/$module_name.$name.css";
-        drupal_add_css($stylesheet, 'theme', 'all', TRUE); 
-      }
-    }
-    // It's not disabled and it's not in code only.
-    else if(!$subtheme->disabled && !$subtheme->in_code_only) {
-      // Load style sheet.
-      $stylesheet = file_directory_path() ."/subtheme/$name/$name.css";
-      drupal_add_css($stylesheet, 'theme', 'all', TRUE);
-    }
-  }
+  if ($path = subtheme_css_path($subtheme)) {
+    drupal_add_css($path, 'theme', 'all', TRUE);
+  } 
 }
 
 /**
@@ -395,6 +377,34 @@ function subtheme_images_path($subtheme, $status = FALSE) {
   }
 
   return $path;
+}
+
+/**
+ * @return
+ *  string, path to subtheme style sheet.
+ */
+function subtheme_css_path($subtheme) {
+  // Get active subtheme.
+  if ($name = subtheme_get_active_subtheme()) {
+    $subtheme = subtheme_get($name);
+    // It's not disabled and it's stored in code.
+    if(!$subtheme->disabled && $subtheme->in_code_only) {
+      // Get info about the features module that has the active subtheme.
+      $feature = subtheme_get_feature($name);
+      if ($feature->status == 1) { // Make sure feature is enabled.
+        $module_name = $feature->name;
+        $path = drupal_get_path('module', $module_name);
+        $stylesheet = $path ."/subtheme/$module_name.$name/$module_name.$name.css";
+      }
+    }
+    // It's not disabled and it's not in code only.
+    else if(!$subtheme->disabled && !$subtheme->in_code_only) {
+      // Load style sheet.
+      $stylesheet = file_directory_path() ."/subtheme/$name/$name.css";
+    }
+  }
+ 
+  return $stylesheet;
 }
 
 /**
