@@ -105,8 +105,9 @@ function subtheme_activation_form_submit(&$form, &$form_state) {
 function _subtheme_activate_options($subthemes) {
   $options = array();
   foreach ($subthemes as $subtheme) {
-    
+    if (!$subtheme->disabled) {
     $options[$subtheme->name] = $subtheme;
+    } 
   }
 
   return $options;
