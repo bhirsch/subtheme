@@ -258,8 +258,6 @@ function subtheme_add_css() {
   // Get active subtheme.
   if ($name = subtheme_get_active_subtheme()) {
     $subtheme = subtheme_get($name);
-//dsm($name); 
-//dsm($subtheme); 
     // It's not disabled and it's stored in code.
     if(!$subtheme->disabled && $subtheme->in_code_only) {
       // Get info about the features module that has the active subtheme.
@@ -278,49 +276,6 @@ function subtheme_add_css() {
       drupal_add_css($stylesheet, 'theme', 'all', TRUE);
     }
   }
-  
-/*
-  $disabled = array();
-  $in_code_only = array();
-  $in_database = array();
-  foreach ($subthemes as $subtheme) {
-    $name = $subtheme->name;
-    if ($subtheme->disabled) { 
-      $disabled[] = $name;
-    }
-    if ($subtheme->in_code_only) {
-      $in_code_only[] = $name;  
-    }
-    if (!in_array($name, $in_code_only)) {
-      $in_database[] = $name; 
-    }
-  }
-     
-  // Load style sheets in code (features modules).
-  $features = features_get_features();
-  foreach ($features as $feature) {
-    // Make sure the feature module is enabled and has subtheme subthemes.
-    if ($feature->info['features']['subtheme_subtheme'] && $feature->status == 1) {
-      $module_name = $feature->name;
-      // Check each subtheme.
-      foreach ($feature->info['features']['subtheme_subtheme'] as $name) {
-        if (!in_array($name, $disabled) && in_array($name, $in_code_only)) {
-          $path = drupal_get_path('module', $module_name);
-          $stylesheet = $path ."/$module_name.$name.css";     // @todo maybe we don't 
-          drupal_add_css($stylesheet, 'theme', 'all', TRUE);  //  need stylesheets in 
-        }                                                     //  .info files anymore?
-      } 
-    }
-  }
-
-  // Load style sheets from files directory (in CSS in database)
-  foreach ($in_database as $name) {
-    if (!in_array($name, $disabled)) {
-      $stylesheet = file_directory_path() ."/subtheme/$name.css";
-      drupal_add_css($stylesheet, 'theme', 'all', TRUE);
-    }  
-  }
-// */ 
 }
 
 /**
