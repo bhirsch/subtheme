@@ -213,6 +213,25 @@ function subtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
 function subtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_state) {
   $subtheme = $form_state['item'];
   $name = $subtheme->name;
+  $revert = (arg(5) == 'revert') ? TRUE : FALSE; // delete form used for revert too.
+
+  // If subtheme is being reverted, and if default status is active
+  // make this module active. (Otherwise, if there are multiple subthemes
+  // that default to is_active == TRUE, the subtheme that gets activated 
+  // will be--or seem--random.)
+  if ($revert) {
+    ctools_include('export');
+    $schema = ctools_export_get_schema('subtheme_subtheme');
+    $export = $schema['export'];
+    $defaults = _ctools_export_get_defaults('subtheme_subtheme', $export);
+    foreach ($defaults as $default) {
+      if ($default->name == $name && $default->is_active) {
+        subtheme_activate($name);
+      }
+    } 
+
+  }
+
   // delete image files 
   $path = file_directory_path() ."/subtheme/$name/images";  
   if (file_check_directory($path)) {
@@ -229,6 +248,7 @@ function subtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_sta
       $txt = $path . t(' could not be deleted.'); 
     }
   }
+
   // delete style sheet and subtheme directory
   $path = file_directory_path() ."/subtheme/$name/$name.css";
   file_delete($path);
@@ -245,4 +265,5 @@ function subtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_sta
       $txt = $path . t(' could not be deleted.'); 
     }
   }
+
 }
