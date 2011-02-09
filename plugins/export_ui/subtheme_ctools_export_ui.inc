@@ -246,8 +246,4 @@ function subtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_sta
       $txt = $path . t(' could not be deleted.'); 
     }
   }
-  // disable subtheme if it's active.
-  if ($subtheme->is_active) {
-    subtheme_deactivate($name);
-  }
 }
