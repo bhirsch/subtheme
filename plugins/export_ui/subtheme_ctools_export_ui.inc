@@ -72,7 +72,7 @@ function subtheme_ctools_export_ui_form(&$form, &$form_state) {
   );
 
   // Enable user to reorganize selectors into groups.
-  if (arg(2) == 'subtheme' && arg(5) == 'edit') {
+  if (arg(2) == 'subtheme' && ( arg(5) == 'edit' || arg(5) == 'clone' )) {
     $form['groups'] = array(
       '#type' => 'item',
       '#title' => t('Organize included selectors into groups'),
@@ -111,6 +111,16 @@ dsm($form);
  * Callback for form validation. 
  *
  * Process input.
+ * 
+ * The form being validated here is responsible for two things:
+ * 1. Determining which mtheme_selectors a subtheme includes
+ * 2. Giving the administrator an opportunity to re-organize
+ *    mtheme_selectors into their own (end-user friendly) groups,
+ *    used to organize selectors on the subtheme edit form
+ *    and in the actual CSS file.
+ * 
+ * *NOTE: Selectors aren't actually modified here. They're in or they're out.
+ * Selectors are modified on the edit form stored in includes/subtheme.edit.inc.
  * 
  * For selectors to be included, check to see if this value
  * has already been included and possibly overridden. (If it show up in 
@@ -152,9 +162,9 @@ function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state)
         unset($processed_selectors[$selector_name]);
       } else if ($include && array_key_exists($selector_name, $saved_selectors)) {
         // Store already-saved value, in case user has made changes.
+        // (Selectors aren't modified here. This form only determines if they're 
+        // included or excluded from the subtheme being edited.)
         $processed_selectors[$selector_name] = $saved_selectors[$selector_name];
-// TODO HOW DOES A SUBTHEME GET MODIFIED HERE? 
-//      I THINK IT WORKS. MAYBE "SAVED SELECTORS" IS JUST A BAD NAME. TEST THIS.
       } else if ($include && !array_key_exists($selector_name, $saved_selectors)) {
         // New selector being added to existing subtheme.
         $processed_selectors[$selector_name] = mtheme_selector_load($selector_name);
