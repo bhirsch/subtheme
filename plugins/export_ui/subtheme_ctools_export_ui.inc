@@ -104,7 +104,6 @@ function subtheme_ctools_export_ui_form(&$form, &$form_state) {
       '#value' => t('Click Save and then Edit to customize groups here.'),
     );
   }
-dsm($form);
 }
 
 /**
