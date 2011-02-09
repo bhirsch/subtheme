@@ -115,13 +115,7 @@ function subtheme_form_submit(&$form, &$form_state) {
   foreach ($values as $selector_name => $css_properties) {
     $subtheme->selectors[$selector_name]->css_properties = $css_properties;
   }
-
-  subtheme_save($subtheme);
-  ctools_include('subtheme', 'subtheme');
-  subtheme_css($subtheme);
-  if ($in_code_only) {
-    subtheme_copy_files($subtheme);
-  }
+  subtheme_save($subtheme, $in_code_only);
 }
 
 /**

@@ -169,16 +169,40 @@ function subtheme_get_subthemes() {
 }
 
 /**
- * Wrapper function for subtheme_subtheme_save($subtheme).
- * 
- * Original function is a Ctools hook: 
- * mymodule_myobj_save($obj). This is just shorter and sweeter.
+ * Save an edited subtheme and handle related workflow relating to subtheme state.
+ *  - copy files from module to files directory when subthem is newly overridden.
+ *  - save object when Ctools hasn't saved it already 
  * 
  * @param $subtheme
  *  Subtheme object.
+ * 
+ * @param $in_code_only
+ *  boolean, default = FALSE. In case some other module saves or
+ *  modifies the subtheme object before this function is called, 
+ *  $in_code_only can be set to TRUE even if $subtheme->in_code_only 
+ *  is false or null. If $in_code_only is TRUE, always copy files from
+ *  module to files/subtheme directory.
+ * 
+ * @param $ctools_save
+ *  boolean, default = FALSE. If subtheme_save() is being called from
+ *  a Ctools form and the $subtheme object has already been saved, set
+ *  $ctools_save to true. Just let this function take care of the additional
+ *  steps (otherwise you get an ugly mysql error).
  */
-function subtheme_save($subtheme) {
-  subtheme_subtheme_save($subtheme);
+function subtheme_save($subtheme, $in_code_only = FALSE, $ctools_save = FALSE) {
+  if (!$ctools_save) {
+    // Ctools hook, mymodule_myobj_save($obj).
+    subtheme_subtheme_save($subtheme);
+  } 
+  // Re-write mysubtheme.css.
+  ctools_include('subtheme', 'subtheme'); 
+  subtheme_css($subtheme); 
+  // If subtheme being saved is in code only (newly overridden)
+  // copy images and CSS to files/subtheme directory.
+  if ($subtheme->in_code_only || $in_code_only) {
+    // Copy image files
+    subtheme_copy_files($subtheme); // @todo add error handling
+  }
 }
 
 /**
@@ -201,17 +225,29 @@ function subtheme_admin_options_get() {
  * @return string, active subtheme name. FALSE if no active subtheme.
  */
 function subtheme_get_active_subtheme() {
-  // @todo Cache active subtheme. Seems unnecessary to load all subthemes here.
+  // @todo Cache active subtheme rathe than load all active subthemes?
   $active_subtheme = FALSE; 
   $subthemes = subtheme_get_subthemes();
+  $count = 0;
   foreach ($subthemes as $subtheme) {
     if ($subtheme->is_active) {
       $active_subtheme = TRUE;
-      return $subtheme->name;  
+      $active_subtheme = $subtheme->name;  
+      ++$count;
     }  
+  }
+  // There should never be more than one active subtheme at any time.
+  // But if multiple subthemes are stored in code with is_active set to TRUE,
+  // it's conceiveable that multiple subthemes could show up as active here.
+  // If $count > 1, set things straight. Make one active and the rest 
+  // overridden as inactive.
+  if ($count > 1) {
+    subtheme_activate($active_subtheme);
   }
   if (!$active_subtheme) { // There is no active subtheme.
     return FALSE;
+  } else {
+    return $active_subtheme;  
   }
 }
 
@@ -237,10 +273,7 @@ function subtheme_add_css() {
     }
     // It's not disabled and it's not in code only.
     else if(!$subtheme->disabled && !$subtheme->in_code_only) {
-      $name = $subtheme->name;
       // Load style sheet.
-      //   In code only -> load stylesheet from feature module // TODO
-      //   In database -> load stylesheet from files directory // TODO 
       $stylesheet = file_directory_path() ."/subtheme/$name/$name.css";
       drupal_add_css($stylesheet, 'theme', 'all', TRUE);
     }
@@ -343,17 +376,6 @@ function subtheme_activate($name) {
       // Activate selected subtheme.
       $subtheme->is_active = TRUE;
       subtheme_save($subtheme);
-      // If module being activated is in code only
-      // copy images and CSS to files/subtheme directory.
-      // Activating a subtheme that defaults to not active
-      // makes it "overridden".
-      if ($subtheme->in_code_only) {
-        // Re-write CSS.
-        ctools_include('subtheme', 'subtheme'); 
-        subtheme_css($subtheme); 
-        // Copy image files
-        subtheme_copy_files($subtheme); // @todo add error handling
-      }
     }
   }
 }
@@ -552,6 +574,9 @@ function subtheme_features_api() {
  * Add elements to .info file.
  */
 function subtheme_subtheme_features_export($data, &$export, $module_name) {
+  // Add dependencies
+  $export['dependencies']['ctools'] = "ctools";
+  $export['dependencies']['features'] = "features";
   // Add ctools default hook.
   $export['features']['ctools']["subtheme:default_subtheme_subtheme:1"] = "subtheme:default_subtheme_subtheme:1";
   // Add subtheme_subtheme objects
