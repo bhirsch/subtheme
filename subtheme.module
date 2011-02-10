@@ -11,7 +11,7 @@
  */
 function subtheme_help($path, $arg) {
   if ($path == 'admin/help#subtheme') {
-    $txt = 'GUI for creating and overriding Subthemes.'; // TODO
+    $txt = 'GUI for creating and overriding Subthemes.'; 
     $output = t($txt);
     return $output;
   }
@@ -22,11 +22,10 @@ function subtheme_help($path, $arg) {
 function subtheme_menu() {
   $items = array();
 
-  // TODO 
   $items['admin/build/subtheme/%/export'] = array(
     'title' => 'export',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('subtheme_export_subtheme', 3), // TODO create function
+    'page arguments' => array('subtheme_export_subtheme', 3), 
     'access arguments' => array('subtheme export'),
     'type' => MENU_CALLBACK,
   );
@@ -340,10 +339,10 @@ function subtheme_copy_files($subtheme) {
     file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
   }
   // return ? // @todo Add error handling. Notify user if unsuccessful? 
-              //       These file functions do a pretty good job notifying 
-              //       administrators about errors,
-              //       still it seems like there should be something
-              //       subtheme-specific here. 
+              // These file functions do a pretty good job notifying 
+              // administrators about errors,
+              // still it seems like there should be something
+              // subtheme-specific here. 
 }
 
 /**
@@ -514,7 +513,6 @@ function subtheme_subtheme_export($obj, $indent = '') {
 /**
  * Save a single myobj.
  */
-// TODO 
 function subtheme_subtheme_save(&$myobj) {
     $update = (isset($myobj->sid) && is_numeric($myobj->sid)) ? array('sid') : array();
       return drupal_write_record('subtheme_subtheme', $myobj, $update);
@@ -523,14 +521,6 @@ function subtheme_subtheme_save(&$myobj) {
 //-------------------------------------------------/
 // Features hooks                                  /
 //-------------------------------------------------/
-/**
- * Implementation of hook_features_api().
- */
-/*
-function subtheme_features_api() {
-}
-// */
-
 /**
  * Implementation of hook_features_export().
  *
@@ -588,25 +578,3 @@ function subtheme_features_files($export, $module_name) {
   }
   return $add_files;
 }
-
-/**
- * Implementation of hook_features_export_render().
- *
- * Component hook.
- */
-/*
-function subtheme_subtheme_features_export_render($module_name, $data, $export = NULL) {
-}
-// */
-
-/**
- * Implementation of hook_features_export_options().
- */
-/**
- * Implementation of hook_features_revert().
- */
-/*
-function subtheme_features_export_revert($module_name) {
-}
-// */
-
