@@ -18,7 +18,7 @@ function subtheme_css($subtheme) {
   $css = subtheme_generate_css($subtheme);   
   $written = subtheme_write_css($css);
   if (!$written) {
-    // TODO handle error here. Notify user.  
+    // @todo handle error here. Notify user.  
   }
 }
 
