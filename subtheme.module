@@ -561,6 +561,8 @@ function subtheme_subtheme_features_export($data, &$export, $module_name) {
   // Add dependencies
   $export['dependencies']['ctools'] = "ctools";
   $export['dependencies']['features'] = "features";
+  $export['dependencies']['mtheme'] = "mtheme";
+  $export['dependencies']['subtheme'] = "subtheme";
   // Add ctools default hook.
   $export['features']['ctools']["subtheme:default_subtheme_subtheme:1"] = "subtheme:default_subtheme_subtheme:1";
   // Add subtheme_subtheme objects
