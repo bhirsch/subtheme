@@ -109,13 +109,18 @@ function subtheme_form() {
 function subtheme_form_submit(&$form, &$form_state) {
   $name = arg(4);
   $subtheme = subtheme_get($name);
-  $in_code_only = $form_state['values']['in_code_only'];
+  if ($form_state['values']['in_code_only']) {
+    $op = array('in code only'); 
+  } else {
+    $op = array();  
+  }
 
   $values = $form_state['values'];
   foreach ($values as $selector_name => $css_properties) {
     $subtheme->selectors[$selector_name]->css_properties = $css_properties;
   }
-  subtheme_save($subtheme, $in_code_only);
+
+  subtheme_save($subtheme, $op); 
 }
 
 /**

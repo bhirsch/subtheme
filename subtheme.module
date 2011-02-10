@@ -89,7 +89,7 @@ function subtheme_form_alter(&$form, &$form_state, $form_id) {
     // admin/build/subtheme/add
     if (arg(3) == 'add' ||
       // admin/build/subtheme/list/subtheme_name/edit
-      (arg(3) == 'list' && arg(5) == 'edit')) {
+      (arg(3) == 'list' && (arg(5) == 'edit' || arg(5) == 'clone') )) {
       // Prep data to save.
       $form['#validate'][] = 'subtheme_ctools_export_ui_edit_item_form_validate';
       $form['#submit'][] = 'subtheme_ctools_export_ui_edit_item_form_submit';
@@ -175,33 +175,53 @@ function subtheme_get_subthemes() {
  * @param $subtheme
  *  Subtheme object.
  * 
- * @param $in_code_only
- *  boolean, default = FALSE. In case some other module saves or
- *  modifies the subtheme object before this function is called, 
- *  $in_code_only can be set to TRUE even if $subtheme->in_code_only 
- *  is false or null. If $in_code_only is TRUE, always copy files from
- *  module to files/subtheme directory.
- * 
- * @param $ctools_save
- *  boolean, default = FALSE. If subtheme_save() is being called from
- *  a Ctools form and the $subtheme object has already been saved, set
- *  $ctools_save to true. Just let this function take care of the additional
- *  steps (otherwise you get an ugly mysql error).
+ * @param $op
+ *  array, options can include any (or none) or the following:
+ *  $op = array('in code only', 'ctools save', 'clone')
+ *  - 'in code only' 
+ *        In case some other module saves or
+ *        modifies the subtheme object before this function is called, 
+ *        'in code only' tells subtheme_save() to 
+ *        copy files from a features module to the files/subtheme 
+ *        directory, even if $subtheme->in_code_only is false.
+ *  - 'ctools save'
+ *        If subtheme_save() is being called from
+ *        a Ctools form and the $subtheme object has already been saved,
+ *        this indicates that we don't need to call subtheme_subtheme_save() 
+ *        here, just let this function take care of the additional
+ *        steps (otherwise you get an ugly mysql error).
+ *  - 'clone'
+ *        A subtheme is being cloned. Copy files from the original subtheme
+ *        to a new directory for the new subtheme.
  */
-function subtheme_save($subtheme, $in_code_only = FALSE, $ctools_save = FALSE) {
+//function subtheme_save($subtheme, $in_code_only = FALSE, $ctools_save = FALSE) {
+function subtheme_save($subtheme, $op = array()) {
+  $ctools_save = (in_array('ctools save', $op)) ? TRUE : FALSE;
+  $clone = (in_array('clone', $op)) ? TRUE : FALSE; 
+  $in_code_only = (in_array('in code only', $op)) ? TRUE : FALSE; 
+
   if (!$ctools_save) {
     // Ctools hook, mymodule_myobj_save($obj).
     subtheme_subtheme_save($subtheme);
   } 
+
   // Re-write mysubtheme.css.
   ctools_include('subtheme', 'subtheme'); 
   subtheme_css($subtheme); 
+
   // If subtheme being saved is in code only (newly overridden)
   // copy images and CSS to files/subtheme directory.
   if ($subtheme->in_code_only || $in_code_only) {
     // Copy image files
     subtheme_copy_files($subtheme); // @todo add error handling
   }
+
+  if ($clone) {
+    $original = arg(4);
+    // Copy image files
+    subtheme_copy_files($subtheme, $original); // @todo add error handling
+  }
+
 }
 
 /**
@@ -327,11 +347,20 @@ function subtheme_activate($name) {
  * 
  * @param $subtheme
  *  object, subtheme_subtheme object.
+ *
+ * @param $original
+ *  string, the original being cloned (if a subtheme is being cloned)
+ * 
  */
-function subtheme_copy_files($subtheme) {
+function subtheme_copy_files($subtheme, $original = NULL) {
   $name = $subtheme->name;
   // Copy images.
-  $images_path = subtheme_images_path($subtheme, 'in code only'); 
+  if (!$original) {
+    $images_path = subtheme_images_path($subtheme, 'in code only'); 
+  } else {
+    $original = subtheme_get($original);
+    $images_path = subtheme_images_path($original);
+  }
   $new_images_path = subtheme_images_path($subtheme, 'files'); 
   file_check_directory($new_images_path, FILE_CREATE_DIRECTORY);
   foreach (@file_scan_directory($images_path, '.*') as $file) {

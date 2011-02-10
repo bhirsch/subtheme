@@ -133,8 +133,8 @@ function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state)
   $processed_selectors = array();
   $processed_groups = array();
 
-  // process selectors, new subthemd
   if (arg(3) == 'add') {
+    // process selectors, new subthee
     foreach ($selectors as $selector_name => $include) {
       if ($include) {
         $selector = mtheme_selector_load($selector_name);
@@ -149,43 +149,42 @@ function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state)
       }
     }
   }
-
   // process selectors, update existing subtheme
-// TODO handle 'clone' here? 
-  if (arg(5) == 'edit') { 
-    $subtheme_name = $form_state['values']['name'];
-    $subtheme = subtheme_get($subtheme_name);
-    $saved_selectors = $subtheme->selectors;
-    foreach ($selectors as $selector_name => $include) {
-      if (!$include) {
-        unset($processed_selectors[$selector_name]);
-      } else if ($include && array_key_exists($selector_name, $saved_selectors)) {
-        // Store already-saved value, in case user has made changes.
-        // (Selectors aren't modified here. This form only determines if they're 
-        // included or excluded from the subtheme being edited.)
-        $processed_selectors[$selector_name] = $saved_selectors[$selector_name];
-      } else if ($include && !array_key_exists($selector_name, $saved_selectors)) {
-        // New selector being added to existing subtheme.
-        $processed_selectors[$selector_name] = mtheme_selector_load($selector_name);
-      }
-      // process groups. every selector needs a group.
+  else if (arg(5) == 'edit' || arg(5) == 'clone') {
+      $subtheme_name = arg(4);
+      $subtheme = subtheme_get($subtheme_name);
+      $saved_selectors = $subtheme->selectors;
       foreach ($selectors as $selector_name => $include) {
-        if ($include && array_key_exists($selector_name, $saved_selectors)) {
-          // Store user-defined group.
-          $processed_groups[$selector_name] = $form_state['values'][$selector_name]; 
+        if (!$include) {
+          unset($processed_selectors[$selector_name]);
+        } else if ($include && array_key_exists($selector_name, $saved_selectors)) {
+          // Store already-saved value, in case user has made changes.
+          // (Selectors aren't modified here. This form only determines if they're 
+          // included or excluded from the subtheme being edited.)
+          $processed_selectors[$selector_name] = $saved_selectors[$selector_name];
         } else if ($include && !array_key_exists($selector_name, $saved_selectors)) {
-          // New selector being added to existing subtheme. Store default (mtheme_selector) group.
-          $processed_groups[$selector_name] = $processed_selectors[$selector_name]->grp;
-        } else {
-          unset($processed_groups[$selector_name]);
+          // New selector being added to existing subtheme.
+          $processed_selectors[$selector_name] = mtheme_selector_load($selector_name);
+        }
+
+        // process groups. every selector needs a group.
+        foreach ($selectors as $selector_name => $include) {
+          if ($include && array_key_exists($selector_name, $saved_selectors)) {
+            // Store user-defined group.
+            $processed_groups[$selector_name] = $form_state['values'][$selector_name]; 
+          } else if ($include && !array_key_exists($selector_name, $saved_selectors)) {
+            // New selector being added to existing subtheme. Store default (mtheme_selector) group.
+            $processed_groups[$selector_name] = $processed_selectors[$selector_name]->grp;
+          } else {
+            unset($processed_groups[$selector_name]);
+          }
         }
       }
     }
-  }
-
 
   $form_state['values']['selectors'] = $processed_selectors;
   $form_state['values']['grps'] = $processed_groups;
+
 }
 
 /**
@@ -195,7 +194,8 @@ function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state)
  */
 function subtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
   $subtheme = $form_state['item'];
-  subtheme_save($subtheme, FALSE, TRUE);  
+  $op = (arg(5) == 'clone') ? array('ctools save', 'clone') : array('ctools save');
+  subtheme_save($subtheme, $op);  
 }
 
 /**
