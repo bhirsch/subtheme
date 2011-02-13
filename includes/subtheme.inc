@@ -59,9 +59,19 @@ function subtheme_generate_css($subtheme) {
 function subtheme_write_css($css) {
   $file_contents = $css['css'];
   $name = $css['name'];
-  // Set the location of the mtheme.css file
+  // Make sure subtheme directory exists.
+  $file_path = file_directory_path() ."/subtheme";
+  // If the directory doesn't exist, create it
+  //$dir = file_check_directory(dirname($file_path), FILE_CREATE_DIRECTORY);
+  $dir = file_check_directory($file_path, FILE_CREATE_DIRECTORY);
+  if (!$dir) {
+    $txt = t('The function file_check_directory() failed. Please notify your system administrator.');
+    drupal_set_message($txt, 'error');
+  }
+  // Set the location of the CSS file
   $file_path = file_directory_path() ."/subtheme/$name/$name.css";
   // If the directory doesn't exist, create it
+  //$dir = file_check_directory(dirname($file_path), FILE_CREATE_DIRECTORY);
   $dir = file_check_directory(dirname($file_path), FILE_CREATE_DIRECTORY);
   if (!$dir) {
     $txt = t('The function file_check_directory() failed. Please notify your system administrator.');
