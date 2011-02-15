@@ -211,7 +211,7 @@ function subtheme_save($subtheme, $op = array()) {
 
   // If subtheme being saved is in code only (newly overridden)
   // copy images and CSS to files/subtheme directory.
-  if ($subtheme->in_code_only || $in_code_only) {
+  if ($subtheme->in_code_only || $in_code_only || arg(3) == 'add') {
     // Copy image files
     subtheme_copy_files($subtheme); // @todo add error handling
   }
@@ -354,19 +354,39 @@ function subtheme_activate($name) {
  */
 function subtheme_copy_files($subtheme, $original = NULL) {
   $name = $subtheme->name;
-  // Copy images.
-  if (!$original) {
+  $new = (arg(3) == 'add') ? TRUE : FALSE; // Brand new subtheme.
+
+  // Get path(s) to image(s)
+  if ($new) { // A new subtheme is being created.
+    // Build an array of image paths for each mtheme_selector with images.  
+    $images_paths = array();
+    foreach ($subtheme->selectors as $selector) {
+      $images_paths[] = mtheme_images_path($selector); 
+    }
+  } else if (!$original) { // An existing subtheme is being overridden
     $images_path = subtheme_images_path($subtheme, 'in code only'); 
-  } else {
+  } else { // An existing subtheme is being cloned.
     $original = subtheme_get($original);
     $images_path = subtheme_images_path($original);
   }
+
+  // Copy images.
   $new_images_path = subtheme_images_path($subtheme, 'files'); 
   file_check_directory($new_images_path, FILE_CREATE_DIRECTORY);
-  foreach (@file_scan_directory($images_path, '.*') as $file) {
-    $file_path = $new_images_path ."/". $file->basename;
-    file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
-  }
+  if ($new) {
+   // Check each mtheme_selector for images. Copy any we find.
+   foreach ($images_paths as $images_path) {
+    foreach (@file_scan_directory($images_path, '.*') as $file) {
+      $file_path = $new_images_path ."/". $file->basename;
+      file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
+    }
+   } 
+  } else { // Subtheme is being cloned or overridden.
+    foreach (@file_scan_directory($images_path, '.*') as $file) {
+      $file_path = $new_images_path ."/". $file->basename;
+      file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
+    }
+  } 
   // return ? // @todo Add error handling. Notify user if unsuccessful? 
               // These file functions do a pretty good job notifying 
               // administrators about errors,
