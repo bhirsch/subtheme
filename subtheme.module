@@ -419,7 +419,7 @@ function subtheme_images_path($subtheme, $status = FALSE) {
     $feature = subtheme_get_feature($name);
     $module_name = $feature->name;
     $module_path = drupal_get_path('module', $module_name);
-    $path = $module_path ."/subtheme/$module_name.$name/images";
+    $path = $module_path ."/subtheme/$name/images";
   } else { // images aren't stored in a features module, or $status == 'files' 
     $path = file_directory_path() .'/subtheme/'. $name .'/images';  
   }
