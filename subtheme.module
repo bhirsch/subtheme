@@ -193,12 +193,16 @@ function subtheme_get_subthemes() {
  *  - 'clone'
  *        A subtheme is being cloned. Copy files from the original subtheme
  *        to a new directory for the new subtheme.
+ *  - 'new_selectors' => array($selectorX, $selectorY);
+ *       Array of $selector objects being newly added to an existing subtheme.
+ *     
  */
 //function subtheme_save($subtheme, $in_code_only = FALSE, $ctools_save = FALSE) {
 function subtheme_save($subtheme, $op = array()) {
   $ctools_save = (in_array('ctools save', $op)) ? TRUE : FALSE;
   $clone = (in_array('clone', $op)) ? TRUE : FALSE; 
   $in_code_only = (in_array('in code only', $op)) ? TRUE : FALSE; 
+  $new_selectors = (array_key_exists('new_selectors', $op)) ? TRUE : FALSE;
 
   if (!$ctools_save) {
     // Ctools hook, mymodule_myobj_save($obj).
@@ -221,6 +225,18 @@ function subtheme_save($subtheme, $op = array()) {
     // Copy image files
     subtheme_copy_files($subtheme, $original); // @todo add error handling
   }
+  
+  /*
+  // @todo If a selector stored in code is newly added to an existing subtheme,
+  //  it's image files don't move over to the subtheme. Fix this.
+  if ($new_selectors) {
+    foreach ($op['new_selectors'] as $selector) {
+      $paths['from'] = mtheme_images_path($selector);
+      $paths['to'] = subtheme_images_path($subtheme);
+      mtheme_copy_files($selector, $paths);
+    }
+  }
+  // */
 
 }
 
