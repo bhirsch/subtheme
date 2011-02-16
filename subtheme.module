@@ -614,10 +614,14 @@ function subtheme_features_files($export, $module_name) {
     foreach ($subtheme_subthemes as $name) {
       $subtheme_path = file_directory_path() ."/subtheme/$name";
       // Get subtheme's CSS file
-      $add_files[$i]->name = $module_name .'.'. $name;
-      $add_files[$i]->basename = $module_name .'.'. $name .'.css'; 
+      //$add_files[$i]->name = $module_name .'.'. $name;
+      $add_files[$i]->name = $name;
+      //$add_files[$i]->basename = $module_name .'.'. $name .'.css'; 
+      $add_files[$i]->basename = $name .'.css'; 
+      //$add_files[$i]->filename = $subtheme_path ."/$name.css";
       $add_files[$i]->filename = $subtheme_path ."/$name.css";
-      $add_files[$i]->subdir = "subtheme/$module_name.$name";
+      //$add_files[$i]->subdir = "subtheme/$module_name.$name";
+      $add_files[$i]->subdir = "subtheme/$name";
       // Check for images.
       $images_path = $subtheme_path .'/images';
       foreach (@file_scan_directory($images_path, '.*') as $file) {
@@ -625,7 +629,7 @@ function subtheme_features_files($export, $module_name) {
         $add_files[$i]->name = $file->name;
         $add_files[$i]->basename = $file->basename;
         $add_files[$i]->filename = $file->filename;
-        $add_files[$i]->subdir = "subtheme/$module_name.$name/images";
+        $add_files[$i]->subdir = "subtheme/$name/images";
       }
       $i++;
     }
