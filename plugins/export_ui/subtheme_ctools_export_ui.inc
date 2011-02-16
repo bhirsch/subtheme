@@ -255,9 +255,6 @@ function subtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_sta
   $path = file_directory_path() ."/subtheme/$name";
   if (file_check_directory($path)) {
     $result = rmdir($path);
-  }
-  if (file_check_directory($path)) {
-    $result = rmdir($path);
     if ($result) {
       $txt = $path . t(' deleted.');  
       drupal_set_message($txt);

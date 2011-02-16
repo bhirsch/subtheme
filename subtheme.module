@@ -592,7 +592,10 @@ function subtheme_subtheme_features_export($data, &$export, $module_name) {
     // @todo for some reason features components need associative arrays
     // to come out right in the .info file. Stylesheet components 
     // seem to need numerical arrays.  
-    $export['stylesheets']['all'][] = "subtheme/$module_name.$component/$component.css";
+    // 
+    // @todo This isn't actually used to load stylesheets. Exclude from info files
+    //  for now, just to keep things tidy. Revisit later.
+    // $export['stylesheets']['all'][] = "subtheme/$module_name.$component/$component.css";
   }
   return array();
 }
