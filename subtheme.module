@@ -193,16 +193,12 @@ function subtheme_get_subthemes() {
  *  - 'clone'
  *        A subtheme is being cloned. Copy files from the original subtheme
  *        to a new directory for the new subtheme.
- *  - 'new_selectors' => array($selectorX, $selectorY);
- *       Array of $selector objects being newly added to an existing subtheme.
- *     
  */
 //function subtheme_save($subtheme, $in_code_only = FALSE, $ctools_save = FALSE) {
 function subtheme_save($subtheme, $op = array()) {
   $ctools_save = (in_array('ctools save', $op)) ? TRUE : FALSE;
   $clone = (in_array('clone', $op)) ? TRUE : FALSE; 
   $in_code_only = (in_array('in code only', $op)) ? TRUE : FALSE; 
-  $new_selectors = (array_key_exists('new_selectors', $op)) ? TRUE : FALSE;
 
   if (!$ctools_save) {
     // Ctools hook, mymodule_myobj_save($obj).
@@ -225,18 +221,6 @@ function subtheme_save($subtheme, $op = array()) {
     // Copy image files
     subtheme_copy_files($subtheme, $original); // @todo add error handling
   }
-  
-  /*
-  // @todo If a selector stored in code is newly added to an existing subtheme,
-  //  it's image files don't move over to the subtheme. Fix this.
-  if ($new_selectors) {
-    foreach ($op['new_selectors'] as $selector) {
-      $paths['from'] = mtheme_images_path($selector);
-      $paths['to'] = subtheme_images_path($subtheme);
-      mtheme_copy_files($selector, $paths);
-    }
-  }
-  // */
 
 }
 
@@ -348,9 +332,46 @@ function subtheme_activate($name) {
       // Activate selected subtheme.
       $subtheme->is_active = TRUE;
       subtheme_save($subtheme);
+      subtheme_set_logo($subtheme);
+    // Note: Use 'else if' next. 'else' lets disabled subthemes slip in.
+    } else if ($subtheme->name == $name && $subtheme->is_active) {
+      // Subtheme is already active. Make sure it's logo is set correctly.
+      subtheme_set_logo($subtheme);
+    }
+  }
+  
+}
+
+/**
+ * @param $subtheme
+ *  object, subtheme object
+ */
+function subtheme_set_logo($subtheme) {
+  $logo_path = subtheme_get_logo($subtheme);  
+  $settings = variable_get('theme_settings', NULL);
+  $settings['logo_path'] = $logo_path;
+  variable_set('theme_settings', $settings);
+}
+
+/**
+ * Look in subtheme directory for a logo (a file 
+ * named logo, with any extension).
+ *
+ * @param $subtheme
+ *  object, subtheme_subtheme object
+ *
+ * @return string, path to this subtheme's logo (not necessarily the active logo)
+ */
+function subtheme_get_logo($subtheme) {
+  $path = subtheme_images_path($subtheme); //Path to files dir or features module w files.
+  foreach (@file_scan_directory($path, '.*') as $file) {
+    // Add form items
+    if ($file->name == 'logo') {
+      return $file->filename;  
     }
   }
 }
+
 
 /**
  * When a subtheme stored in code is modified through Drupal's GUI
@@ -422,6 +443,8 @@ function subtheme_copy_files($subtheme, $original = NULL) {
  * 
  * @param $subtheme
  *  object, subtheme_subtheme object. 
+ *  or
+ *  string, subtheme name, only use string if you know images are in files directory 
  * 
  * @param $status
  *  string, 'in code only' OR 'files'
@@ -430,7 +453,13 @@ function subtheme_copy_files($subtheme, $original = NULL) {
  *  string, path/to/images/directory.
  */
 function subtheme_images_path($subtheme, $status = FALSE) {
-  $name = $subtheme->name;
+
+  if (is_object($subtheme)) {
+    $name = $subtheme->name;
+  } else if (is_string($subtheme)) {
+    $name = $subtheme;  
+  }
+
   if (!$status && $subtheme->in_code_only || $status == 'in code only') { 
     $feature = subtheme_get_feature($name);
     $module_name = $feature->name;

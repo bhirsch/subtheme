@@ -8,9 +8,6 @@
  * Callback for admin/build/subtheme/edit/%
  */
 function subtheme_form() {
-  $path = drupal_get_path('module', 'subtheme') .'/subtheme.css';
-  drupal_add_css($path);
-
   $name = arg(4);
   $subtheme = subtheme_get($name);
   $default_selectors = mtheme_get_selectors();
@@ -20,6 +17,31 @@ function subtheme_form() {
     '#title' => 'Style Sheet',
     '#value' => l("$name.css", file_directory_path() ."/subtheme/$name/$name.css"),
   );
+
+  // Site logo
+  $form['logo'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Site-wide: Logo/Banner'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  // Prompt user to upload own graphic for main background here
+  $form['logo']['logo'] = array(
+    '#type' => 'file',
+    '#title' => t('Logo/Banner'),
+    '#size' => 30,
+    '#element_validate' => array('subtheme_save_logo'),
+  );
+  // Path to logo
+  if ($logo_path = subtheme_get_logo($subtheme)) {
+    global $base_url;
+    $logo = $base_url .'/'. $logo_path;
+    // Display background image.
+    $form['logo']['logo-display'] = array(
+      '#type' => 'item',
+      '#title' => "<img src='$logo' />",
+    );
+  }
 
   // Organize by groups
   $groups = $subtheme->grps;
@@ -151,5 +173,61 @@ function subtheme_save_files($form, &$form_state) {
     // collector delete the original upload.
     file_copy($file, $file_path, FILE_EXISTS_REPLACE);
   }
+  return $form;
+}
+
+/**
+ * "logo" is a special file name. There can only
+ * be one file named logo in any subtheme at any time.
+ * This lets us store different logos with different subthemes,
+ * while deactivated subthemes' logos are not in use.
+ *
+ * @param $subtheme
+ *  string, subtheme name
+ */
+function subtheme_remove_logo($subtheme) {
+  $path = subtheme_images_path($subtheme); //Path to files dir or features module w files.
+  foreach (@file_scan_directory($path, '.*') as $file) {
+    // Add form items
+    if ($file->name == 'logo') {
+      if (!$result = file_delete($file->filename)) {
+        $txt = t('Old logo could not be removed: '). $file->filename;
+        drupal_set_message($txt); 
+      }
+    }
+  }
+}
+
+/**
+ * Save new logo.
+ */
+function subtheme_save_logo($form, &$form_state) {
+  // Get parent (the form element that called this function)
+  $parent = $form['#parents'][0];
+  // Check for a new uploaded file, and use that if available.
+  if ($file = file_save_upload($parent)) {
+    $subtheme = arg(4);
+    subtheme_remove_logo($subtheme);
+    // Get file extension.
+    $parts = pathinfo($file->filename);
+    $extension = $parts['extension'];
+    // Check for file subtheme file directories. Create if needed.
+    $directory = subtheme_images_path($subtheme);
+    file_check_directory($directory, FILE_CREATE_DIRECTORY);
+    // Name the file.
+    $file_path = $directory .'/logo.'. $extension;
+    // Save new subtheme logo. 
+    if (file_copy($file, $file_path, FILE_EXISTS_REPLACE)) {
+      $txt = t('Your new logo has been saved.'); 
+      drupal_set_message($txt);
+      // If subtheme is active, update site logo.
+      if ($subtheme == subtheme_get_active_subtheme()) { 
+        $settings = variable_get('theme_settings', NULL);
+        $settings['logo_path'] = $file_path;
+        variable_set('theme_settings', $settings);
+      }
+    }
+  }
+
   return $form;
 }

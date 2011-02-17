@@ -132,13 +132,15 @@ function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state)
 
   $processed_selectors = array();
   $processed_groups = array();
-  //$new_selectors = array();
 
   if (arg(3) == 'add') {
     // process selectors, new subthee
     foreach ($selectors as $selector_name => $include) {
       if ($include) {
         $selector = mtheme_selector_load($selector_name);
+        //$selector->css_properties = "/******** uncomment to override default CSS properties ********* \n"
+        //                           .$selector->css_properties
+        //                           ."\n **************************************************************/"; 
         $processed_selectors[$selector_name] = $selector;
         $processed_groups[$selector_name] = $selector->grp;
       } else {
@@ -162,9 +164,7 @@ function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state)
           $processed_selectors[$selector_name] = $saved_selectors[$selector_name];
         } else if ($include && !array_key_exists($selector_name, $saved_selectors)) {
           // New selector being added to existing subtheme.
-          $selector = mtheme_selector_load($selector_name);
-          $processed_selectors[$selector_name] = $selector;
-          //$new_selectors[] = $selector;
+          $processed_selectors[$selector_name] = mtheme_selector_load($selector_name);
         }
 
         // process groups. every selector needs a group.
@@ -185,13 +185,6 @@ function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state)
   $form_state['values']['selectors'] = $processed_selectors;
   $form_state['values']['grps'] = $processed_groups;
 
-  // @todo See note about new_selectors in subtheme_save().
-  // @todo Also note, setting storage here interferes with Ctools saving
-  //       new selector somehow. (Leaving it as-is, info about the
-  //       new selector and CSS properties get saved. It's just image files
-  //       that get left behind.) 
-  //$form_state['storage']['new_selectors'] = $new_selectors;
-
 }
 
 /**
@@ -201,15 +194,7 @@ function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state)
  */
 function subtheme_ctools_export_ui_edit_item_form_submit(&$form, &$form_state) {
   $subtheme = $form_state['item'];
-
-  $op['save'] = 'ctools save'; // Ctools took care of saving the $subtheme object.
-  if (arg(5) == 'clone') {
-    $op['status'] = 'clone';  
-  }
-  if ($form_state['storage']['new_selectors']) { 
-    $op['new_selectors'] = $form_state['storage']['new_selectors'];
-  }
-  
+  $op = (arg(5) == 'clone') ? array('ctools save', 'clone') : array('ctools save');
   subtheme_save($subtheme, $op);  
 }
 
