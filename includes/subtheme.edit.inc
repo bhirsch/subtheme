@@ -64,13 +64,28 @@ function subtheme_form() {
 
     // Add selectors
     $selector = $subtheme->selectors[$selector_name];
-    $form[$group][$selector->name] = array(
+    $prefix = 'selector_'; // Use this to keep garbage out of $subtheme->selectors when processing data in subtheme_form_submit(). 
+    $key = $prefix . $selector->name;
+    $form[$group][$key] = array(
       '#type' => 'textarea',
       '#title' => '/*** ' . check_plain($selector->title) .' ***/<br/>'. t(check_plain($selector->css_selector)),
       '#default_value' => $selector->css_properties,
       '#description' => t('CSS selector: ') . $selector->css_selector .'<br />'. t('default: ') . $default_selectors[$selector->name]->css_properties, 
     );
   }
+  // Custom CSS
+  $form['custom'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Custom CSS'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['custom']['custom_css'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Add your own custom CSS'),
+    '#default_value' => $subtheme->custom_css,
+    '#description' => t('Anything added here will be appended to the bottom of the last stylesheet loaded by the site.'), 
+  );
   // Include files field group for uploading background images
   // Include enctype, otherwise uploads won't work!
   $form['#attributes'] = array('enctype' => 'multipart/form-data');
@@ -120,7 +135,8 @@ function subtheme_form() {
 /**
  * Implementation of hook_form_submit().
  * 
- * Save new $subtheme. Re-write CSS.
+ * Process input in subtheme form, construct a new $subtheme object and save it. 
+ * (During subtheme_save(), CSS for the subtheme will be re-written).
  * 
  * Form being submited is from path: admin/build/subtheme/edit/%
  * 
@@ -130,6 +146,8 @@ function subtheme_form() {
  *    'selector_name_2' => (object) stdClass
  *    'selector_name_N' => (object) -> css_properties 
  *  );
+ *  $subtheme->custom_css = '.example1 { property: value; } '
+ *                         .'.example2 { property: value; } ';
  */
 function subtheme_form_submit(&$form, &$form_state) {
   $name = arg(4);
@@ -142,8 +160,16 @@ function subtheme_form_submit(&$form, &$form_state) {
 
   $values = $form_state['values'];
   foreach ($values as $selector_name => $css_properties) {
-    $subtheme->selectors[$selector_name]->css_properties = $css_properties;
+  // Check for selector prefix.
+    if (substr($selector_name, 0, 9) == 'selector_') { // Check prefix to keep misc other $form['values'] out of $subtheme->selectors.
+      $selector_name = substr($selector_name, 9);
+      $subtheme->selectors[$selector_name]->css_properties = $css_properties;
+    }
   }
+
+  // Add custom css.
+  $custom_css = $form_state['values']['custom_css'];
+  $subtheme->custom_css = $custom_css;
 
   subtheme_save($subtheme, $op); 
 }

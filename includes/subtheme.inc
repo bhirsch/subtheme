@@ -34,6 +34,8 @@ function subtheme_css($subtheme) {
  */
 function subtheme_generate_css($subtheme) {
   $css = _mtheme_start_css(); // @todo Move css-writing helper functions into own module.
+
+  // Module Theme CSS overrides
   $groups = $subtheme->grps;
   asort($groups);
   $group_comments = array();
@@ -45,6 +47,13 @@ function subtheme_generate_css($subtheme) {
     $selector = $subtheme->selectors[$selector_name];
     $css = _mtheme_write_selector_css($css, $selector); 
   }
+
+  // Append custom CSS at the end
+  if ($subtheme->custom_css) {
+    $txt = t('Custom CSS');
+    $css = _mtheme_group_comment($css, array('group_title' => $txt)); // @todo move func to css module.
+    $css .= $subtheme->custom_css; // Note: This is not being filtered for XSS. Only privileged users should be allowed to add custom CSS.
+  } 
 
   return array('name' => $subtheme->name, 'css' => $css); 
 }

@@ -194,7 +194,6 @@ function subtheme_get_subthemes() {
  *        A subtheme is being cloned. Copy files from the original subtheme
  *        to a new directory for the new subtheme.
  */
-//function subtheme_save($subtheme, $in_code_only = FALSE, $ctools_save = FALSE) {
 function subtheme_save($subtheme, $op = array()) {
   $ctools_save = (in_array('ctools save', $op)) ? TRUE : FALSE;
   $clone = (in_array('clone', $op)) ? TRUE : FALSE; 

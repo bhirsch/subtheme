@@ -86,6 +86,14 @@ function subtheme_schema() {
         'serialize' => TRUE,
         'serialized default' => 'a:0:{}',
       ),
+      'custom_css' => array(
+        'type' => 'text',
+        'size' => 'big',
+        'description' => t('Custom CSS. These selectors are created by the end-user, '
+                          .'they do not originate in a module theme.'),
+        'not null' => TRUE,
+        'default' => '',
+      ),
       'is_active' => array(
         'type' => 'int',
         'unsigned' => TRUE,
@@ -105,9 +113,19 @@ function subtheme_schema() {
 /**
  * Implementation of hook_update_N.
  * 
- * Add permission field.
+ * Add custom_css field.
  */
-/*
 function subtheme_update_6001() {
+  $ret = array();
+  $table = 'subtheme_subtheme';
+  $field = 'custom_css';
+  $spec = array(
+    'type' => 'text',
+    'size' => 'big',
+    'description' => t('Custom CSS. These selectors are created by the end-user, '
+                      .'they do not originate in a module theme.'),
+    'not null' => TRUE,
+    'default' => '',
+  );
+  db_add_field(&$ret, $table, $field, $spec, $new_keys);
 }
-// */
