@@ -8,6 +8,9 @@
  * Callback for admin/build/subtheme/edit/%
  */
 function subtheme_form() {
+  $path = drupal_get_path('module', 'subtheme') .'/subtheme.css';
+  drupal_add_css($path);
+
   $name = arg(4);
   $subtheme = subtheme_get($name);
   $default_selectors = mtheme_get_selectors();

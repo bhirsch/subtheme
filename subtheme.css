@@ -4,3 +4,5 @@
 div.subtheme-admin-checkboxes label.option { float:left; }
 div.subtheme-admin-css-selector { margin: 10px 10px 10px 30px }
 div.subtheme-admin-customize { margin: 10px; }
+
+form#subtheme-form .form-item label { text-transform: none; }
