@@ -69,9 +69,10 @@ function subtheme_form() {
     $selector = $subtheme->selectors[$selector_name];
     $prefix = 'selector_'; // Use this to keep garbage out of $subtheme->selectors when processing data in subtheme_form_submit(). 
     $key = $prefix . $selector->name;
+    $title = ($selector->title) ? '/*** ' . t(check_plain($selector->title)) .' ***/<br/>'. check_plain($selector->css_selector) : check_plain($selector->css_selector);  
     $form[$group][$key] = array(
       '#type' => 'textarea',
-      '#title' => '/*** ' . check_plain($selector->title) .' ***/<br/>'. t(check_plain($selector->css_selector)),
+      '#title' => $title,
       '#default_value' => $selector->css_properties,
       '#description' => t('CSS selector: ') . $selector->css_selector .'<br />'. t('default: ') . $default_selectors[$selector->name]->css_properties, 
     );
