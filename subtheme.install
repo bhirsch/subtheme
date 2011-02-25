@@ -5,8 +5,8 @@
 
 /**
  * hook_install()
- * 
- * set weight of this module to 10, so its submit function will run 
+ *
+ * set weight of this module to 10, so its submit function will run
  * after other modules modifying the subtheme form.
  */
 function subtheme_install() {
@@ -31,16 +31,16 @@ function subtheme_schema() {
       'key name' => 'Name',
       'primary key' => 'sid',
       'identifier' => 'subtheme', // Exports will be as $selector
-      'default hook' => 'default_subtheme_subtheme',  // Function hook name.
+      'default hook' => 'default_subtheme_subtheme', // Function hook name.
       'api' => array(
         'owner' => 'subtheme',
-        'api' => 'default_subtheme_subtheme',  // Base name for api include files.
+        'api' => 'default_subtheme_subtheme', // Base name for api include files.
         'minimum_version' => 1,
         'current_version' => 1,
       ),
     ),
     'fields' => array(
-      // selector id 
+      // selector id
       'sid' => array(
         'type' => 'serial',
         'unsigned' => TRUE,
@@ -50,25 +50,25 @@ function subtheme_schema() {
       ),
       // name (machine, unique id)
       'name' => array(
-        'type' => 'varchar',  
-        'length' => 64,      
-        'not null' => TRUE, 
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
         'default' => '',
         'description' => t('Unique ID for this object. Used to identify it programmatically.'),
       ),
       // title (human readable)
       'title' => array(
-        'type' => 'varchar',  
-        'length' => 64,      
-        'not null' => TRUE, 
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
         'default' => '',
         'description' => t('Human readable title.'),
       ),
-      // description 
+      // description
       'description' => array(
-        'type' => 'varchar',  
-        'length' => 255,      
-        'not null' => TRUE, 
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
         'default' => '',
         'description' => t('Optional description of selector.'),
       ),
@@ -90,7 +90,7 @@ function subtheme_schema() {
         'type' => 'text',
         'size' => 'big',
         'description' => t('Custom CSS. These selectors are created by the end-user, '
-                          .'they do not originate in a module theme.'),
+                          . 'they do not originate in a module theme.'),
         'not null' => TRUE,
         'default' => '',
       ),
@@ -112,7 +112,7 @@ function subtheme_schema() {
 
 /**
  * Implementation of hook_update_N.
- * 
+ *
  * Add custom_css field.
  */
 function subtheme_update_6001() {
@@ -123,7 +123,7 @@ function subtheme_update_6001() {
     'type' => 'text',
     'size' => 'big',
     'description' => t('Custom CSS. These selectors are created by the end-user, '
-                      .'they do not originate in a module theme.'),
+                      . 'they do not originate in a module theme.'),
     'not null' => TRUE,
     'default' => '',
   );

@@ -1,7 +1,7 @@
 <?php
 /**
  * @file subtheme.activate.inc
- *  Activate subtheme form functions. 
+ *  Activate subtheme form functions.
  */
 /**
  * Callback for admin/build/subtheme/activate.
@@ -14,7 +14,7 @@ function subtheme_activation_form() {
 
   $default = subtheme_get_active_subtheme();
   if (!$default) {
-    $default = 'disabled';  
+    $default = 'disabled';
   }
 
   $form['activate'] = array(
@@ -22,11 +22,11 @@ function subtheme_activation_form() {
     '#title' => t('Activate a subtheme by making a selection here'),
     '#options' => $options,
     '#default_value' => $default,
-    '#prefix' => '<div class="subtheme subtheme-admin-activate-radios">', 
+    '#prefix' => '<div class="subtheme subtheme-admin-activate-radios">',
     '#suffix' => '</div>',
-  );  
+  );
   $form['submit'] = array(
-    '#type' => 'submit', 
+    '#type' => 'submit',
     '#value' => t('Save'),
   );
   $form['#theme'] = 'subtheme_activate';
@@ -39,9 +39,9 @@ function theme_subtheme_activate($form) {
   $output .= '<table>';
   $output .= '<tr>';
   $output .=   '<th></th>';
-  $output .=   '<th>'. t('Subtheme') .'</th>';
-  $output .=   '<th>'. t('Description') .'</th>';
-  $output .=   '<th>'. t('Edit') .'</th>';
+  $output .=   '<th>' . t('Subtheme') . '</th>';
+  $output .=   '<th>' . t('Description') . '</th>';
+  $output .=   '<th>' . t('Edit') . '</th>';
   $output .= '</tr>';
 
   // List options in alpha order by title
@@ -56,21 +56,21 @@ function theme_subtheme_activate($form) {
   // Add a row for each available subtheme
   foreach ($list as $name => $title) {
     $zebra = ($count % 2) ? 'odd' : 'even';
-//    $checked = ($name == 'red') ? 'checked="checked" ' : '';
+    //    $checked = ($name == 'red') ? 'checked="checked" ' : '';
     $checked = ($default == $name) ? 'checked="checked" ' : '';
     $description = t(check_plain($form['activate']['#options'][$name]->description));
     $edit_link = ($name == 'disabled') ? '' : l(t('Edit'), "admin/build/subtheme/edit/$name");
     $title = ($name == 'disabled') ? t('No active subtheme') : $title;
-    $output .=   '<tr class="'. $zebra .'" >';
+    $output .=   '<tr class="' . $zebra . '" >';
     $output .=     "<td>"
-                   .'<input type="radio" '
-                     .'class="form-radio" '
-                     .'value="'. $name .'" '
-                     .$checked 
-                     .'name="activate" '
-                     .'id="edit-activate-'. $name .'" '
-                   .'>'
-                  ."</td>";
+                   . '<input type="radio" '
+                     . 'class="form-radio" '
+                     . 'value="' . $name . '" '
+                     . $checked
+                     . 'name="activate" '
+                     . 'id="edit-activate-' . $name . '" '
+                   . '>'
+                  . "</td>";
     $output .=     "<td>$title</td>";
     $output .=     "<td>$description</td>";
     $output .=     "<td>$edit_link</td>";
@@ -106,8 +106,8 @@ function _subtheme_activate_options($subthemes) {
   $options = array();
   foreach ($subthemes as $subtheme) {
     if (!$subtheme->disabled) {
-    $options[$subtheme->name] = $subtheme;
-    } 
+      $options[$subtheme->name] = $subtheme;
+    }
   }
 
   return $options;
@@ -119,15 +119,15 @@ function theme_subtheme_activate_options($subtheme) {
 
   $output .= '<class="subtheme subtheme-activate-option">';
 
-    $output .= '<div class="subtheme subtheme-activate-title">';
-      $output .= check_plain($subtheme->title);
-    $output .= '</div>';
+  $output .= '<div class="subtheme subtheme-activate-title">';
+  $output .= check_plain($subtheme->title);
+  $output .= '</div>';
 
-    $output .= '<div class="subtheme subtheme-activate-description">';
-      $output .= check_plain($subtheme->description);
-    $output .= '</div>';
+  $output .= '<div class="subtheme subtheme-activate-description">';
+  $output .= check_plain($subtheme->description);
+  $output .= '</div>';
 
   $output .= '</div>';
 
-  return $output;  
+  return $output;
 }

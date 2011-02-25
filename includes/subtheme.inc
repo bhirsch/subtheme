@@ -10,15 +10,15 @@
  *    files/subtheme/subtheme_name/images/imageA.png
  *    files/subtheme/subtheme_name/images/imageB.jpg
  *    files/subtheme/subtheme_name/images/imageC.gif
- * 
+ *
  * @param $subtheme
- *  object, $subtheme 
+ *  object, $subtheme
  */
 function subtheme_css($subtheme) {
-  $css = subtheme_generate_css($subtheme);   
+  $css = subtheme_generate_css($subtheme);
   $written = subtheme_write_css($css);
   if (!$written) {
-    // @todo handle error here. Notify user.  
+    // @todo handle error here. Notify user.
   }
 }
 
@@ -45,7 +45,7 @@ function subtheme_generate_css($subtheme) {
       $group_comments[$group] = TRUE;
     }
     $selector = $subtheme->selectors[$selector_name];
-    $css = _mtheme_write_selector_css($css, $selector); 
+    $css = _mtheme_write_selector_css($css, $selector);
   }
 
   // Append custom CSS at the end
@@ -53,23 +53,23 @@ function subtheme_generate_css($subtheme) {
     $txt = t('Custom CSS');
     $css = _mtheme_group_comment($css, array('group_title' => $txt)); // @todo move func to css module.
     $css .= $subtheme->custom_css; // Note: This is not being filtered for XSS. Only privileged users should be allowed to add custom CSS.
-  } 
+  }
 
-  return array('name' => $subtheme->name, 'css' => $css); 
+  return array('name' => $subtheme->name, 'css' => $css);
 }
 
 /**
- * Write CSS and store it 
+ * Write CSS and store it
  * in files/subtheme/subtheme_name/subtheme_name.css.
- * 
+ *
  * @param $css
  *  Array. $css = array('name' => $name, 'css' => $css);
- */ 
+ */
 function subtheme_write_css($css) {
   $file_contents = $css['css'];
   $name = $css['name'];
   // Make sure subtheme directory exists.
-  $file_path = file_directory_path() ."/subtheme";
+  $file_path = file_directory_path() . "/subtheme";
   // If the directory doesn't exist, create it
   //$dir = file_check_directory(dirname($file_path), FILE_CREATE_DIRECTORY);
   $dir = file_check_directory($file_path, FILE_CREATE_DIRECTORY);
@@ -78,7 +78,7 @@ function subtheme_write_css($css) {
     drupal_set_message($txt, 'error');
   }
   // Set the location of the CSS file
-  $file_path = file_directory_path() ."/subtheme/$name/$name.css";
+  $file_path = file_directory_path() . "/subtheme/$name/$name.css";
   // If the directory doesn't exist, create it
   //$dir = file_check_directory(dirname($file_path), FILE_CREATE_DIRECTORY);
   $dir = file_check_directory(dirname($file_path), FILE_CREATE_DIRECTORY);
@@ -90,11 +90,11 @@ function subtheme_write_css($css) {
   // Create CSS file.
   $saved = file_save_data($file_contents, $file_path, FILE_EXISTS_REPLACE);
   if (!$saved) {
-    $txt = t('The function file_save_data() failed. Please notify your system administrator.'); 
+    $txt = t('The function file_save_data() failed. Please notify your system administrator.');
     drupal_set_message($txt, 'error');
   }
 
-  // Notify user about new CSS 
+  // Notify user about new CSS
   $txt = t('New CSS file created: !file',
           array('!file' => l($file_path, $file_path)));
 

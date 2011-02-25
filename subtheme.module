@@ -3,7 +3,7 @@
 
 /**
  * @file
- * subtheme.module provides users a settings page for creating a subtheme. 
+ * subtheme.module provides users a settings page for creating a subtheme.
  */
 
 /**
@@ -11,7 +11,7 @@
  */
 function subtheme_help($path, $arg) {
   if ($path == 'admin/help#subtheme') {
-    $txt = 'GUI for creating and overriding Subthemes.'; 
+    $txt = 'GUI for creating and overriding Subthemes.';
     $output = t($txt);
     return $output;
   }
@@ -25,19 +25,19 @@ function subtheme_menu() {
   $items['admin/build/subtheme/%/export'] = array(
     'title' => 'export',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('subtheme_export_subtheme', 3), 
+    'page arguments' => array('subtheme_export_subtheme', 3),
     'access arguments' => array('subtheme export'),
     'type' => MENU_CALLBACK,
   );
 
   $items['admin/build/subtheme/activate'] = array(
-    'title' => t('Activate'), 
+    'title' => t('Activate'),
     'description' => t('Activate selected subtheme'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('subtheme_activation_form'),
-    'access arguments' => array('manage subtheme'), 
+    'access arguments' => array('manage subtheme'),
     'type' => MENU_LOCAL_TASK,
-    'file' => 'includes/subtheme.activate.inc', 
+    'file' => 'includes/subtheme.activate.inc',
     'weight' => 10,
   );
   $items['admin/build/subtheme/edit/%'] = array(
@@ -45,9 +45,9 @@ function subtheme_menu() {
     'description' => t('Customize Subtheme Styles'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('subtheme_form'),
-    'access arguments' => array('manage subtheme'), 
+    'access arguments' => array('manage subtheme'),
     'type' => MENU_NORMAL_ITEM,
-    'file' => 'includes/subtheme.edit.inc', 
+    'file' => 'includes/subtheme.edit.inc',
   );
 
   return $items;
@@ -76,16 +76,16 @@ function subtheme_theme() {
       'arguments' => array('form' => NULL),
       'file' => 'includes/subtheme.activate.inc',
     ),
-  );  
+  );
 }
 
 /**
  * Implementation of hook_form_alter().
  */
 function subtheme_form_alter(&$form, &$form_state, $form_id) {
-//dsm($form_id);
+  //dsm($form_id);
   // Modify forms for adding and editing subtheme objects
-  if ($form_id == 'ctools_export_ui_edit_item_form' && arg(2) == 'subtheme') { 
+  if ($form_id == 'ctools_export_ui_edit_item_form' && arg(2) == 'subtheme') {
     // admin/build/subtheme/add
     if (arg(3) == 'add' ||
       // admin/build/subtheme/list/subtheme_name/edit
@@ -94,8 +94,9 @@ function subtheme_form_alter(&$form, &$form_state, $form_id) {
       $form['#validate'][] = 'subtheme_ctools_export_ui_edit_item_form_validate';
       $form['#submit'][] = 'subtheme_ctools_export_ui_edit_item_form_submit';
     }
-  // Modify forms for deleting and reverting subtheme objects
-  } else if ($form_id == 'ctools_export_ui_delete_confirm_form' && arg(2) == 'subtheme') {
+    // Modify forms for deleting and reverting subtheme objects
+  }
+  else if ($form_id == 'ctools_export_ui_delete_confirm_form' && arg(2) == 'subtheme') {
     $form['#submit'][] = 'subtheme_ctools_export_ui_delete_confirm_form_submit';
   }
 }
@@ -106,22 +107,22 @@ function subtheme_form_alter(&$form, &$form_state, $form_id) {
  * on the admin/build/subtheme/add and /edit forms.
  */
 function theme_subtheme_options_details($selector) {
-  $path = drupal_get_path('module', 'subtheme') .'/subtheme.css';
+  $path = drupal_get_path('module', 'subtheme') . '/subtheme.css';
   drupal_add_css($path);
 
-   $output = '';
-   $output .= '<div class="subtheme-admin-css-selector">';
-     $output .= '<div>';
-       $output .= '/*** '. t($selector->title) .', '. $selector->name .' ';
-       if ($selector->disabled) {
-         $output .= ' '. t('(DISABLED) ');   
-       }
-       $output .= ' ***/';
-     $output .= '</div>';
-     $output .= '<div>'.  $selector->css_selector .'</div>';
-   $output .= '</div>';
+  $output = '';
+  $output .= '<div class="subtheme-admin-css-selector">';
+  $output .= '<div>';
+  $output .= '/*** ' . t($selector->title) . ', ' . $selector->name . ' ';
+  if ($selector->disabled) {
+    $output .= ' ' . t('(DISABLED) ');
+  }
+  $output .= ' ***/';
+  $output .= '</div>';
+  $output .= '<div>' .  $selector->css_selector . '</div>';
+  $output .= '</div>';
 
-   return $output;
+  return $output;
 }
 
 //-------------------------------------------//
@@ -130,7 +131,7 @@ function theme_subtheme_options_details($selector) {
 
 function _subtheme_title_customize_page() {
   $name = arg(4);
-  $title = t('Customize Style Sheet: '); 
+  $title = t('Customize Style Sheet: ');
   $title .= t(subtheme_get_title($name));
   return $title;
 }
@@ -138,7 +139,7 @@ function _subtheme_title_customize_page() {
 /**
  * @param $name
  *  string, subtheme name.
- * 
+ *
  * @return $subtheme, subtheme object.
  */
 function subtheme_get($name) {
@@ -154,8 +155,8 @@ function subtheme_get($name) {
  *  Subtheme title.
  */
 function subtheme_get_title($name) {
- $subtheme = subtheme_get($name);
- return $subtheme->title;
+  $subtheme = subtheme_get($name);
+  return $subtheme->title;
 }
 
 /**
@@ -164,30 +165,30 @@ function subtheme_get_title($name) {
  */
 function subtheme_get_subthemes() {
   ctools_include('export');
-  return ctools_export_load_object('subtheme_subtheme'); 
+  return ctools_export_load_object('subtheme_subtheme');
 }
 
 /**
  * Save an edited subtheme and handle related workflow relating to subtheme state.
  *  - copy files from module to files directory when subthem is newly overridden.
- *  - save object when Ctools hasn't saved it already 
- * 
+ *  - save object when Ctools hasn't saved it already
+ *
  * @param $subtheme
  *  Subtheme object.
- * 
+ *
  * @param $op
  *  array, options can include any (or none) or the following:
  *  $op = array('in code only', 'ctools save', 'clone')
- *  - 'in code only' 
+ *  - 'in code only'
  *        In case some other module saves or
- *        modifies the subtheme object before this function is called, 
- *        'in code only' tells subtheme_save() to 
- *        copy files from a features module to the files/subtheme 
+ *        modifies the subtheme object before this function is called,
+ *        'in code only' tells subtheme_save() to
+ *        copy files from a features module to the files/subtheme
  *        directory, even if $subtheme->in_code_only is false.
  *  - 'ctools save'
  *        If subtheme_save() is being called from
  *        a Ctools form and the $subtheme object has already been saved,
- *        this indicates that we don't need to call subtheme_subtheme_save() 
+ *        this indicates that we don't need to call subtheme_subtheme_save()
  *        here, just let this function take care of the additional
  *        steps (otherwise you get an ugly mysql error).
  *  - 'clone'
@@ -196,17 +197,17 @@ function subtheme_get_subthemes() {
  */
 function subtheme_save($subtheme, $op = array()) {
   $ctools_save = (in_array('ctools save', $op)) ? TRUE : FALSE;
-  $clone = (in_array('clone', $op)) ? TRUE : FALSE; 
-  $in_code_only = (in_array('in code only', $op)) ? TRUE : FALSE; 
+  $clone = (in_array('clone', $op)) ? TRUE : FALSE;
+  $in_code_only = (in_array('in code only', $op)) ? TRUE : FALSE;
 
   if (!$ctools_save) {
     // Ctools hook, mymodule_myobj_save($obj).
     subtheme_subtheme_save($subtheme);
-  } 
+  }
 
   // Re-write mysubtheme.css.
-  ctools_include('subtheme', 'subtheme'); 
-  subtheme_css($subtheme); 
+  ctools_include('subtheme', 'subtheme');
+  subtheme_css($subtheme);
 
   // If subtheme being saved is in code only (newly overridden)
   // copy images and CSS to files/subtheme directory.
@@ -227,7 +228,7 @@ function subtheme_save($subtheme, $op = array()) {
  *
  */
 function subtheme_admin_options_get() {
-  $selectors = mtheme_get_selectors(); 
+  $selectors = mtheme_get_selectors();
 
   // Show all mtheme selectors as options
   $options = array();
@@ -244,28 +245,29 @@ function subtheme_admin_options_get() {
  */
 function subtheme_get_active_subtheme() {
   // @todo Cache active subtheme rathe than load all active subthemes?
-  $active_subtheme = FALSE; 
+  $active_subtheme = FALSE;
   $subthemes = subtheme_get_subthemes();
   $count = 0;
   foreach ($subthemes as $subtheme) {
     if ($subtheme->is_active) {
       $active_subtheme = TRUE;
-      $active_subtheme = $subtheme->name;  
+      $active_subtheme = $subtheme->name;
       ++$count;
-    }  
+    }
   }
   // There should never be more than one active subtheme at any time.
   // But if multiple subthemes are stored in code with is_active set to TRUE,
   // it's conceiveable that multiple subthemes could show up as active here.
-  // If $count > 1, set things straight. Make one active and the rest 
+  // If $count > 1, set things straight. Make one active and the rest
   // overridden as inactive.
   if ($count > 1) {
     subtheme_activate($active_subtheme);
   }
   if (!$active_subtheme) { // There is no active subtheme.
     return FALSE;
-  } else {
-    return $active_subtheme;  
+  }
+  else {
+    return $active_subtheme;
   }
 }
 
@@ -275,19 +277,19 @@ function subtheme_get_active_subtheme() {
 function subtheme_add_css() {
   if ($path = subtheme_css_path($subtheme)) {
     drupal_add_css($path, 'theme', 'all', TRUE);
-  } 
+  }
 }
 
 /**
  * @param $name
  *  string, subtheme name
- * 
+ *
  * @return $feature
- *  object, results of features_get_feature($name) for the 
+ *  object, results of features_get_feature($name) for the
  *  feature module that stores the subtheme requested.
- * 
+ *
  * @todo cache info about which subtheme is stored in which
- *     module so we don't have to load all these features 
+ *     module so we don't have to load all these features
  *     modules here.
  */
 function subtheme_get_feature($name) {
@@ -299,12 +301,12 @@ function subtheme_get_feature($name) {
     if ($feature->info['features']['subtheme_subtheme']) {
       foreach ($feature->info['features']['subtheme_subtheme'] as $subtheme_name) {
         if ($subtheme_name == $name) {
-          $feature_with_subtheme = $feature;  
+          $feature_with_subtheme = $feature;
         }
       }
     }
   }
- 
+
   return $feature_with_subtheme;
 }
 
@@ -312,9 +314,9 @@ function subtheme_get_feature($name) {
  * Activate subtheme.
  *
  * Currently, there can only be one active subtheme at any given point
- * in time. 
- * 
- * @todo Set up subthemes to work more like themes that can be 
+ * in time.
+ *
+ * @todo Set up subthemes to work more like themes that can be
  *  enabled/disabled for different users, organic groups, etc.
  *
  * @param $name
@@ -327,18 +329,20 @@ function subtheme_activate($name) {
       // Set active subtheme to inactive.
       $subtheme->is_active = FALSE;
       subtheme_save($subtheme);
-    } else if ($subtheme->name == $name && !$subtheme->is_active) {
+    }
+    else if ($subtheme->name == $name && !$subtheme->is_active) {
       // Activate selected subtheme.
       $subtheme->is_active = TRUE;
       subtheme_save($subtheme);
       subtheme_set_logo($subtheme);
-    // Note: Use 'else if' next. 'else' lets disabled subthemes slip in.
-    } else if ($subtheme->name == $name && $subtheme->is_active) {
+      // Note: Use 'else if' next. 'else' lets disabled subthemes slip in.
+    }
+    else if ($subtheme->name == $name && $subtheme->is_active) {
       // Subtheme is already active. Make sure it's logo is set correctly.
       subtheme_set_logo($subtheme);
     }
   }
-  
+
 }
 
 /**
@@ -346,14 +350,14 @@ function subtheme_activate($name) {
  *  object, subtheme object
  */
 function subtheme_set_logo($subtheme) {
-  $logo_path = subtheme_get_logo($subtheme);  
+  $logo_path = subtheme_get_logo($subtheme);
   $settings = variable_get('theme_settings', NULL);
   $settings['logo_path'] = $logo_path;
   variable_set('theme_settings', $settings);
 }
 
 /**
- * Look in subtheme directory for a logo (a file 
+ * Look in subtheme directory for a logo (a file
  * named logo, with any extension).
  *
  * @param $subtheme
@@ -366,7 +370,7 @@ function subtheme_get_logo($subtheme) {
   foreach (@file_scan_directory($path, '.*') as $file) {
     // Add form items
     if ($file->name == 'logo') {
-      return $file->filename;  
+      return $file->filename;
     }
   }
 }
@@ -377,16 +381,16 @@ function subtheme_get_logo($subtheme) {
  * (a subtheme that is disabled by default becomes enabled,
  * someone changes the text's color, etc.), copy all the files
  * from the subtheme's features module into the files directory,
- * otherwise relative links to background images will break when 
- * the new CSS file is written in the files/subtheme/subtheme_name 
+ * otherwise relative links to background images will break when
+ * the new CSS file is written in the files/subtheme/subtheme_name
  * directory.
- * 
+ *
  * @param $subtheme
  *  object, subtheme_subtheme object.
  *
  * @param $original
  *  string, the original being cloned (if a subtheme is being cloned)
- * 
+ *
  */
 function subtheme_copy_files($subtheme, $original = NULL) {
   $name = $subtheme->name;
@@ -394,60 +398,63 @@ function subtheme_copy_files($subtheme, $original = NULL) {
 
   // Get path(s) to image(s)
   if ($new) { // A new subtheme is being created.
-    // Build an array of image paths for each mtheme_selector with images.  
+    // Build an array of image paths for each mtheme_selector with images.
     $images_paths = array();
     foreach ($subtheme->selectors as $selector) {
-      $images_paths[] = mtheme_images_path($selector); 
+      $images_paths[] = mtheme_images_path($selector);
     }
-  } else if (!$original) { // An existing subtheme is being overridden
-    $images_path = subtheme_images_path($subtheme, 'in code only'); 
-  } else { // An existing subtheme is being cloned.
+  }
+  else if (!$original) { // An existing subtheme is being overridden
+    $images_path = subtheme_images_path($subtheme, 'in code only');
+  }
+  else { // An existing subtheme is being cloned.
     $original = subtheme_get($original);
     $images_path = subtheme_images_path($original);
   }
 
   // Copy images.
-  $new_images_path = subtheme_images_path($subtheme, 'files'); 
+  $new_images_path = subtheme_images_path($subtheme, 'files');
   file_check_directory($new_images_path, FILE_CREATE_DIRECTORY);
   if ($new) {
-   // Check each mtheme_selector for images. Copy any we find.
-   foreach ($images_paths as $images_path) {
+    // Check each mtheme_selector for images. Copy any we find.
+    foreach ($images_paths as $images_path) {
+      foreach (@file_scan_directory($images_path, '.*') as $file) {
+        $file_path = $new_images_path . "/" . $file->basename;
+        file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
+      }
+    }
+  }
+  else { // Subtheme is being cloned or overridden.
     foreach (@file_scan_directory($images_path, '.*') as $file) {
-      $file_path = $new_images_path ."/". $file->basename;
+      $file_path = $new_images_path . "/" . $file->basename;
       file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
     }
-   } 
-  } else { // Subtheme is being cloned or overridden.
-    foreach (@file_scan_directory($images_path, '.*') as $file) {
-      $file_path = $new_images_path ."/". $file->basename;
-      file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
-    }
-  } 
-  // return ? // @todo Add error handling. Notify user if unsuccessful? 
-              // These file functions do a pretty good job notifying 
-              // administrators about errors,
-              // still it seems like there should be something
-              // subtheme-specific here. 
+  }
+  // return ? // @todo Add error handling. Notify user if unsuccessful?
+  // These file functions do a pretty good job notifying
+  // administrators about errors,
+  // still it seems like there should be something
+  // subtheme-specific here.
 }
 
 /**
  * Find the path to the subtheme's images directory.
- * 
+ *
  * If no status is passed, assume we're finding out the
- * current images file location. (If the subtheme is in code only, 
- * the images directory lives in a features module. Otherwise, the 
+ * current images file location. (If the subtheme is in code only,
+ * the images directory lives in a features module. Otherwise, the
  * images directory lives in files/subtheme/subtheme_name/images.
  * If a status is passed, return the requested path (for an images directory
  * when in code only, or an images directory in the files directory).
- * 
+ *
  * @param $subtheme
- *  object, subtheme_subtheme object. 
+ *  object, subtheme_subtheme object.
  *  or
- *  string, subtheme name, only use string if you know images are in files directory 
- * 
+ *  string, subtheme name, only use string if you know images are in files directory
+ *
  * @param $status
  *  string, 'in code only' OR 'files'
- * 
+ *
  * @return
  *  string, path/to/images/directory.
  */
@@ -455,17 +462,19 @@ function subtheme_images_path($subtheme, $status = FALSE) {
 
   if (is_object($subtheme)) {
     $name = $subtheme->name;
-  } else if (is_string($subtheme)) {
-    $name = $subtheme;  
+  }
+  else if (is_string($subtheme)) {
+    $name = $subtheme;
   }
 
-  if (!$status && $subtheme->in_code_only || $status == 'in code only') { 
+  if (!$status && $subtheme->in_code_only || $status == 'in code only') {
     $feature = subtheme_get_feature($name);
     $module_name = $feature->name;
     $module_path = drupal_get_path('module', $module_name);
-    $path = $module_path ."/subtheme/$name/images";
-  } else { // images aren't stored in a features module, or $status == 'files' 
-    $path = file_directory_path() .'/subtheme/'. $name .'/images';  
+    $path = $module_path . "/subtheme/$name/images";
+  }
+  else { // images aren't stored in a features module, or $status == 'files'
+    $path = file_directory_path() . '/subtheme/' . $name . '/images';
   }
 
   return $path;
@@ -480,22 +489,22 @@ function subtheme_css_path($subtheme) {
   if ($name = subtheme_get_active_subtheme()) {
     $subtheme = subtheme_get($name);
     // It's not disabled and it's stored in code.
-    if(!$subtheme->disabled && $subtheme->in_code_only) {
+    if (!$subtheme->disabled && $subtheme->in_code_only) {
       // Get info about the features module that has the active subtheme.
       $feature = subtheme_get_feature($name);
       if ($feature->status == 1) { // Make sure feature is enabled.
         $module_name = $feature->name;
         $path = drupal_get_path('module', $module_name);
-        $stylesheet = $path ."/subtheme/$module_name.$name/$module_name.$name.css";
+        $stylesheet = $path . "/subtheme/$module_name.$name/$module_name.$name.css";
       }
     }
     // It's not disabled and it's not in code only.
-    else if(!$subtheme->disabled && !$subtheme->in_code_only) {
+    else if (!$subtheme->disabled && !$subtheme->in_code_only) {
       // Load style sheet.
-      $stylesheet = file_directory_path() ."/subtheme/$name/$name.css";
+      $stylesheet = file_directory_path() . "/subtheme/$name/$name.css";
     }
   }
- 
+
   return $stylesheet;
 }
 
@@ -503,7 +512,7 @@ function subtheme_css_path($subtheme) {
  * Deactivate subtheme.
  *
  * @param $name
- *  string, subtheme name. 
+ *  string, subtheme name.
  */
 function subtheme_deactivate($name) {
   $subtheme = subtheme_get($name);
@@ -524,8 +533,9 @@ function subtheme_admin_options_default_values($name, $options) {
   if ($selectors) {
     foreach ($options as $name => $details) {
       $default_values[$name] = (array_key_exists($name, $selectors)) ? $name : FALSE;
-    } 
-  } else {
+    }
+  }
+  else {
     $default_values[$name] = FALSE;
   }
 
@@ -541,15 +551,15 @@ function subtheme_admin_options_default_values($name, $options) {
  */
 function subtheme_ctools_plugin_directory($module, $plugin) {
   if ($plugin == 'export_ui') {
-    return 'plugins/'. $plugin;
+    return 'plugins/' . $plugin;
   }
 }
 
 /**
-* Implementation of hook_ctools_plugin_api().
-*
-* Tell CTools that we support the default_mymodule_presets API.
-*/
+ * Implementation of hook_ctools_plugin_api().
+ *
+ * Tell CTools that we support the default_mymodule_presets API.
+ */
 function subtheme_ctools_plugin_api($owner, $api) {
   if ($owner == 'subtheme' && $api == 'default_subtheme_subtheme') {
     return array('version' => 1);
@@ -562,7 +572,7 @@ function subtheme_ctools_plugin_api($owner, $api) {
 
 /**
  * Export a myobj and display it in a form.
- * 
+ *
  * @param $name
  *  string, unique id for object
  */
@@ -588,7 +598,7 @@ function subtheme_export_subtheme(&$form_state, $name) {
  */
 function subtheme_subtheme_load($name) {
   ctools_include('export');
-  $result = ctools_export_load_object('subtheme_subtheme', 'names', array($name)); 
+  $result = ctools_export_load_object('subtheme_subtheme', 'names', array($name));
   if (isset($result[$name])) {
     return $result[$name];
   }
@@ -607,8 +617,8 @@ function subtheme_subtheme_export($obj, $indent = '') {
  * Save a single myobj.
  */
 function subtheme_subtheme_save(&$myobj) {
-    $update = (isset($myobj->sid) && is_numeric($myobj->sid)) ? array('sid') : array();
-      return drupal_write_record('subtheme_subtheme', $myobj, $update);
+  $update = (isset($myobj->sid) && is_numeric($myobj->sid)) ? array('sid') : array();
+  return drupal_write_record('subtheme_subtheme', $myobj, $update);
 }
 
 //-------------------------------------------------/
@@ -618,7 +628,7 @@ function subtheme_subtheme_save(&$myobj) {
  * Implementation of hook_features_export().
  *
  * Component hook.
- * 
+ *
  * Add elements to .info file.
  */
 function subtheme_subtheme_features_export($data, &$export, $module_name) {
@@ -632,11 +642,11 @@ function subtheme_subtheme_features_export($data, &$export, $module_name) {
   // Add subtheme_subtheme objects
   foreach ($data as $component) {
     $export['features']['subtheme_subtheme'][$component] = $component;
-    // $export['stylesheets']['all'][$component] = $component .'.css'; 
+    // $export['stylesheets']['all'][$component] = $component .'.css';
     // @todo for some reason features components need associative arrays
-    // to come out right in the .info file. Stylesheet components 
-    // seem to need numerical arrays.  
-    // 
+    // to come out right in the .info file. Stylesheet components
+    // seem to need numerical arrays.
+    //
     // @todo This isn't actually used to load stylesheets. Exclude from info files
     //  for now, just to keep things tidy. Revisit later.
     // $export['stylesheets']['all'][] = "subtheme/$module_name.$component/$component.css";
@@ -646,28 +656,28 @@ function subtheme_subtheme_features_export($data, &$export, $module_name) {
 
 /**
  * Implementation of hook_features_files().
- * 
- * @todo This hook is provided by a patched version of 
+ *
+ * @todo This hook is provided by a patched version of
  * Features. See http://github.com/bhirsch/features.
  */
 function subtheme_features_files($export, $module_name) {
   $add_files = array();
   if ($subtheme_subthemes = $export['features']['subtheme_subtheme']) {
-    // Get css files for each subtheme. (Multiple subthemes can be exported at once). 
+    // Get css files for each subtheme. (Multiple subthemes can be exported at once).
     $i = 0;
     foreach ($subtheme_subthemes as $name) {
-      $subtheme_path = file_directory_path() ."/subtheme/$name";
+      $subtheme_path = file_directory_path() . "/subtheme/$name";
       // Get subtheme's CSS file
       //$add_files[$i]->name = $module_name .'.'. $name;
       $add_files[$i]->name = $name;
-      //$add_files[$i]->basename = $module_name .'.'. $name .'.css'; 
-      $add_files[$i]->basename = $name .'.css'; 
+      //$add_files[$i]->basename = $module_name .'.'. $name .'.css';
+      $add_files[$i]->basename = $name . '.css';
       //$add_files[$i]->filename = $subtheme_path ."/$name.css";
-      $add_files[$i]->filename = $subtheme_path ."/$name.css";
+      $add_files[$i]->filename = $subtheme_path . "/$name.css";
       //$add_files[$i]->subdir = "subtheme/$module_name.$name";
       $add_files[$i]->subdir = "subtheme/$name";
       // Check for images.
-      $images_path = $subtheme_path .'/images';
+      $images_path = $subtheme_path . '/images';
       foreach (@file_scan_directory($images_path, '.*') as $file) {
         $i++;
         $add_files[$i]->name = $file->name;

@@ -1,14 +1,14 @@
 <?php
 /**
  * @file subtheme.edit.inc
- *  Edit subtheme form functions. 
+ *  Edit subtheme form functions.
  */
 
 /**
  * Callback for admin/build/subtheme/edit/%
  */
 function subtheme_form() {
-  $path = drupal_get_path('module', 'subtheme') .'/subtheme.css';
+  $path = drupal_get_path('module', 'subtheme') . '/subtheme.css';
   drupal_add_css($path);
 
   $name = arg(4);
@@ -18,7 +18,7 @@ function subtheme_form() {
   $form['stylesheet'] = array(
     '#type' => 'item',
     '#title' => 'Style Sheet',
-    '#value' => l("$name.css", file_directory_path() ."/subtheme/$name/$name.css"),
+    '#value' => l("$name.css", file_directory_path() . "/subtheme/$name/$name.css"),
   );
 
   // Site logo
@@ -38,7 +38,7 @@ function subtheme_form() {
   // Path to logo
   if ($logo_path = subtheme_get_logo($subtheme)) {
     global $base_url;
-    $logo = $base_url .'/'. $logo_path;
+    $logo = $base_url . '/' . $logo_path;
     // Display background image.
     $form['logo']['logo-display'] = array(
       '#type' => 'item',
@@ -55,7 +55,7 @@ function subtheme_form() {
     $group = strtolower(preg_replace('/[^a-zA-Z0-9-]+/', '-', $group_title));
 
     // Create new fieldset
-    if (!$group_fieldset[$group]) { 
+    if (!$group_fieldset[$group]) {
       $group_fieldset[$group] = TRUE;
       $form[$group] = array(
         '#type' => 'fieldset',
@@ -67,14 +67,14 @@ function subtheme_form() {
 
     // Add selectors
     $selector = $subtheme->selectors[$selector_name];
-    $prefix = 'selector_'; // Use this to keep garbage out of $subtheme->selectors when processing data in subtheme_form_submit(). 
+    $prefix = 'selector_'; // Use this to keep garbage out of $subtheme->selectors when processing data in subtheme_form_submit().
     $key = $prefix . $selector->name;
-    $title = ($selector->title) ? '/*** ' . t(check_plain($selector->title)) .' ***/<br/>'. check_plain($selector->css_selector) : check_plain($selector->css_selector);  
+    $title = ($selector->title) ? '/*** ' . t(check_plain($selector->title)) . ' ***/<br/>' . check_plain($selector->css_selector) : check_plain($selector->css_selector);
     $form[$group][$key] = array(
       '#type' => 'textarea',
       '#title' => $title,
       '#default_value' => $selector->css_properties,
-      '#description' => t('CSS selector: ') . $selector->css_selector .'<br />'. t('default: ') . $default_selectors[$selector->name]->css_properties, 
+      '#description' => t('CSS selector: ') . $selector->css_selector . '<br />' . t('default: ') . $default_selectors[$selector->name]->css_properties,
     );
   }
   // Custom CSS
@@ -88,7 +88,7 @@ function subtheme_form() {
     '#type' => 'textarea',
     '#title' => t('Add your own custom CSS'),
     '#default_value' => $subtheme->custom_css,
-    '#description' => t('Anything added here will be appended to the bottom of the last stylesheet loaded by the site.'), 
+    '#description' => t('Anything added here will be appended to the bottom of the last stylesheet loaded by the site.'),
   );
   // Include files field group for uploading background images
   // Include enctype, otherwise uploads won't work!
@@ -116,14 +116,14 @@ function subtheme_form() {
     $item = $file->basename;
     $form['files'][$item] = array(
       '#type' => 'item',
-      '#title' => t("File "). $i,
+      '#title' => t("File ") . $i,
       '#value' => $link,
       '#description' => t("Add this file to your CSS like this: "
-                         ."background: url('". $title ."');"),
+                         . "background: url('" . $title . "');"),
     );
-    $i++; 
+    $i++;
   }
-  // Keep track of whether the subtheme was in code only when form 
+  // Keep track of whether the subtheme was in code only when form
   // was built.
   $form['in_code_only'] = array(
     '#type' => 'hidden',
@@ -138,17 +138,17 @@ function subtheme_form() {
 
 /**
  * Implementation of hook_form_submit().
- * 
- * Process input in subtheme form, construct a new $subtheme object and save it. 
+ *
+ * Process input in subtheme form, construct a new $subtheme object and save it.
  * (During subtheme_save(), CSS for the subtheme will be re-written).
- * 
+ *
  * Form being submited is from path: admin/build/subtheme/edit/%
- * 
- * Process form then save $subtheme object like this: 
+ *
+ * Process form then save $subtheme object like this:
  *  $subtheme->selectors = array(
  *    'selector_name_1' => (object) stdClass
  *    'selector_name_2' => (object) stdClass
- *    'selector_name_N' => (object) -> css_properties 
+ *    'selector_name_N' => (object) -> css_properties
  *  );
  *  $subtheme->custom_css = '.example1 { property: value; } '
  *                         .'.example2 { property: value; } ';
@@ -157,14 +157,15 @@ function subtheme_form_submit(&$form, &$form_state) {
   $name = arg(4);
   $subtheme = subtheme_get($name);
   if ($form_state['values']['in_code_only']) {
-    $op = array('in code only'); 
-  } else {
-    $op = array();  
+    $op = array('in code only');
+  }
+  else {
+    $op = array();
   }
 
   $values = $form_state['values'];
   foreach ($values as $selector_name => $css_properties) {
-  // Check for selector prefix.
+    // Check for selector prefix.
     if (substr($selector_name, 0, 9) == 'selector_') { // Check prefix to keep misc other $form['values'] out of $subtheme->selectors.
       $selector_name = substr($selector_name, 9);
       $subtheme->selectors[$selector_name]->css_properties = $css_properties;
@@ -175,17 +176,17 @@ function subtheme_form_submit(&$form, &$form_state) {
   $custom_css = $form_state['values']['custom_css'];
   $subtheme->custom_css = $custom_css;
 
-  subtheme_save($subtheme, $op); 
+  subtheme_save($subtheme, $op);
 }
 
 /**
  * Save image files.
- * 
- * Callback for #element_validate on 
+ *
+ * Callback for #element_validate on
  * #files element of subtheme_form.
  */
 function subtheme_save_files($form, &$form_state) {
-  $name = arg(4); 
+  $name = arg(4);
   // Get parent (the form element that called this function)
   $parent = $form['#parents'][0];
   // Check for a new uploaded file, and use that if available.
@@ -194,10 +195,10 @@ function subtheme_save_files($form, &$form_state) {
     $parts = pathinfo($file->filename);
     //$extension = $parts['extension'];
     // Check for images file directory. Create if needed.
-    $directory = file_directory_path() .'/subtheme/'. $name. '/images';
+    $directory = file_directory_path() . '/subtheme/' . $name . '/images';
     file_check_directory($directory, FILE_CREATE_DIRECTORY);
-    //Name the file. 
-    $file_path = $directory ."/". $file->filename;
+    //Name the file.
+    $file_path = $directory . "/" . $file->filename;
     // The image was saved using file_save_upload() and was added to the
     // files table as a temporary file. We'll make a copy and let the garbage
     // collector delete the original upload.
@@ -221,8 +222,8 @@ function subtheme_remove_logo($subtheme) {
     // Add form items
     if ($file->name == 'logo') {
       if (!$result = file_delete($file->filename)) {
-        $txt = t('Old logo could not be removed: '). $file->filename;
-        drupal_set_message($txt); 
+        $txt = t('Old logo could not be removed: ') . $file->filename;
+        drupal_set_message($txt);
       }
     }
   }
@@ -245,13 +246,13 @@ function subtheme_save_logo($form, &$form_state) {
     $directory = subtheme_images_path($subtheme);
     file_check_directory($directory, FILE_CREATE_DIRECTORY);
     // Name the file.
-    $file_path = $directory .'/logo.'. $extension;
-    // Save new subtheme logo. 
+    $file_path = $directory . '/logo.' . $extension;
+    // Save new subtheme logo.
     if (file_copy($file, $file_path, FILE_EXISTS_REPLACE)) {
-      $txt = t('Your new logo has been saved.'); 
+      $txt = t('Your new logo has been saved.');
       drupal_set_message($txt);
       // If subtheme is active, update site logo.
-      if ($subtheme == subtheme_get_active_subtheme()) { 
+      if ($subtheme == subtheme_get_active_subtheme()) {
         $settings = variable_get('theme_settings', NULL);
         $settings['logo_path'] = $file_path;
         variable_set('theme_settings', $settings);
