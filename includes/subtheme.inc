@@ -40,7 +40,9 @@ function subtheme_generate_css($subtheme) {
   asort($groups);
   $group_comments = array();
   foreach ($groups as $selector_name => $group) {
-    if (!$group_comments[$group]) { // One group comment line per group please.
+    // TODO Make sure this is working. Revised to handle undefined property error.
+    // if (!$group_comments[$group]) { // One group comment line per group please.
+    if (empty($group_comments[$group])) { // One group comment line per group please.
       $css = _mtheme_group_comment($css, array('group_title' => $group)); // @todo move func to css module.
       $group_comments[$group] = TRUE;
     }
@@ -97,8 +99,10 @@ function subtheme_write_css($css) {
   }
 
   // Notify user about new CSS
+  $public = new DrupalPublicStreamWrapper;
+  $file_path = $public->getDirectoryPath() . "/subtheme/$name/$name.css";
   $txt = t('New CSS file created: !file',
-          array('!file' => l($destination, $destination)));
+          array('!file' => l($file_path, $file_path)));
 
   drupal_set_message($txt);
 }

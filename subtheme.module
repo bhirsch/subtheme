@@ -128,9 +128,11 @@ function theme_subtheme_options_details($variables) {
   $output .= '<div class="subtheme-admin-css-selector">';
   $output .= '<div>';
   $output .= '/*** ' . t($selector->title) . ', ' . $selector->name . ' ';
-  if ($selector->disabled) {
-    $output .= ' ' . t('(DISABLED) ');
-  }
+  if (property_exists($selector, 'disabled')) {
+    if ($selector->disabled) {
+      $output .= ' ' . t('(DISABLED) ');
+    }
+  } 
   $output .= ' ***/';
   $output .= '</div>';
   $output .= '<div>' .  $selector->css_selector . '</div>';
@@ -225,6 +227,11 @@ function subtheme_save($subtheme, $op = array()) {
 
   // If subtheme being saved is in code only (newly overridden)
   // copy images and CSS to files/subtheme directory.
+  //
+  // Handle undefined index error.
+  if (!property_exists($subtheme, 'in_code_only')) {
+    $subtheme->in_code_only = FALSE;  
+  }
   if ($subtheme->in_code_only || $in_code_only || arg(3) == 'add') {
     // Copy image files
     subtheme_copy_files($subtheme); // @todo add error handling
@@ -435,15 +442,31 @@ function subtheme_copy_files($subtheme, $original = NULL) {
     // Check each mtheme_selector for images. Copy any we find.
     foreach ($images_paths as $images_path) {
       foreach (@file_scan_directory($images_path, '/.*/') as $file) {
-        $file_path = $new_images_path . "/" . $file->basename;
-        file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
+        $destination = $new_images_path . "/" . $file->filename;
+        $source = $file->uri; 
+        if ($filename = file_unmanaged_copy($source, $destination, FILE_EXISTS_REPLACE)) {
+          $txt = t("New file saved: ") . l($filename, $filename);
+          drupal_set_message($txt);
+        } else {
+          $txt = t("Failed to save file here: ") . $destination;
+          drupal_set_message($txt, 'error');
+        }
       }
     }
   }
   else { // Subtheme is being cloned or overridden.
     foreach (@file_scan_directory($images_path, '/.*/') as $file) {
-      $file_path = $new_images_path . "/" . $file->basename;
-      file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
+      //$file_path = $new_images_path . "/" . $file->basename;
+     // file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
+      $destination = $new_images_path . "/" . $file->filename;
+      $source = $file->uri;
+      if ($filename = file_unmanaged_copy($source, $destination, FILE_EXISTS_REPLACE)) {
+        $txt = t("New file saved: ") . l($filename, $filename);
+        drupal_set_message($txt);
+      } else {
+        $txt = t("Failed to save file here: ") . $destination;
+        drupal_set_message($txt, 'error');
+      }
     }
   }
   // return ? // @todo Add error handling. Notify user if unsuccessful?
@@ -471,19 +494,47 @@ function subtheme_copy_files($subtheme, $original = NULL) {
  * @param $status
  *  string, 'in code only' OR 'files'
  *
+ * @param $type
+ *  String. 
+ *  - 'relative', Return value should be a path relative to Drupal's root directory 
+ *    (e.g. sites/default/files/subtheme/mysubtheme/images)
+ *  - 'uri', Return value should be something like: 
+ *     public://files/subtheme/myselector/images)
+ *
  * @return
  *  string, path/to/images/directory.
  *
  * TODO see mtheme_images path. Return relative path for CSS 
  *  and URI for preparing directories.
  */
-function subtheme_images_path($subtheme, $status = FALSE) {
+function subtheme_images_path($subtheme, $status = FALSE, $type = 'relative') {
 
   if (is_object($subtheme)) {
     $name = $subtheme->name;
   }
   else if (is_string($subtheme)) {
     $name = $subtheme;
+  }
+
+  // Build prefix. The prefix will be one of these: 
+  // - sites/mysite.com/files/
+  // - sites/default/files/
+  // - public://
+  //
+  // It's one of the first two options above.
+  if ($type == 'relative') {
+    $public = new DrupalPublicStreamWrapper;
+    $prefix = $public->getDirectoryPath();
+    $prefix .= '/';
+  }
+  // This will almost always return public://, but it could be set
+  // to something else.
+  else if ($type == 'uri') {
+     $prefix = file_build_uri(''); 
+  } 
+  else {
+    $txt = t('No type defined. See function: mtheme_images_path() in mtheme.module.');  
+    drupal_set_message($txt, 'error');
   }
 
   if (!$status && $subtheme->in_code_only || $status == 'in code only') {
@@ -493,7 +544,8 @@ function subtheme_images_path($subtheme, $status = FALSE) {
     $path = $module_path . "/subtheme/$name/images";
   }
   else { // images aren't stored in a features module, or $status == 'files'
-    $path = file_directory_path() . '/subtheme/' . $name . '/images';
+    $path = $prefix . 'subtheme/' . $name . '/images';
+    $path = file_stream_wrapper_uri_normalize($path);
   }
 
   return $path;
@@ -546,12 +598,13 @@ function subtheme_deactivate($name) {
  * @param $options
  */
 function subtheme_admin_options_default_values($name, $options) {
-  $subtheme = subtheme_get($name);
-  $selectors = $subtheme->selectors;
-  $default_values = array();
-  if ($selectors) {
-    foreach ($options as $name => $details) {
-      $default_values[$name] = (array_key_exists($name, $selectors)) ? $name : FALSE;
+  if ($subtheme = subtheme_get($name)) {
+    $selectors = $subtheme->selectors;
+    $default_values = array();
+    if ($selectors) {
+      foreach ($options as $name => $details) {
+        $default_values[$name] = (array_key_exists($name, $selectors)) ? $name : FALSE;
+      }
     }
   }
   else {

@@ -22,10 +22,12 @@ $plugin = array(
     // 'submit' and 'validate' are also valid callbacks.
   ),
   // Use this to modify the default export UI interface.
+  /*
   'handler' => array(
     'class' => 'subtheme_export_ui',
     'parent' => 'ctools_export_ui',
   ),
+  // */
 );
 
 /**

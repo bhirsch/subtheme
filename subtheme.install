@@ -74,7 +74,6 @@ function subtheme_schema() {
         'size' => 'big',
         'description' => 'Custom CSS. These selectors are created by the end-user, ',
         'not null' => TRUE,
-        'default' => '',
       ),
       'is_active' => array(
         'type' => 'int',
