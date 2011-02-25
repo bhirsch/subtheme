@@ -7,7 +7,7 @@
 /**
  * Callback for admin/build/subtheme/edit/%
  */
-function subtheme_form() {
+function subtheme_form($form, &$form_state) {
   $path = drupal_get_path('module', 'subtheme') . '/subtheme.css';
   drupal_add_css($path);
 
@@ -109,7 +109,7 @@ function subtheme_form() {
   $name = arg(4);
   $path = subtheme_images_path($subtheme); //Path to files dir or features module w files.
   $i = 0; // Use counter in case of conflicting $file->name values
-  foreach (@file_scan_directory($path, '.*') as $file) {
+  foreach (@file_scan_directory($path, '/.*/') as $file) {
     $title = "images/$file->basename";
     $link = l($title, $file->filename);
     // Add form items
@@ -137,7 +137,7 @@ function subtheme_form() {
 }
 
 /**
- * Implementation of hook_form_submit().
+ * Implements hook_form_submit().
  *
  * Process input in subtheme form, construct a new $subtheme object and save it.
  * (During subtheme_save(), CSS for the subtheme will be re-written).
@@ -184,6 +184,9 @@ function subtheme_form_submit(&$form, &$form_state) {
  *
  * Callback for #element_validate on
  * #files element of subtheme_form.
+ *
+ * TODO Replace this function with handling on validate and submit.
+ *  See mtheme.
  */
 function subtheme_save_files($form, &$form_state) {
   $name = arg(4);
@@ -195,8 +198,9 @@ function subtheme_save_files($form, &$form_state) {
     $parts = pathinfo($file->filename);
     //$extension = $parts['extension'];
     // Check for images file directory. Create if needed.
-    $directory = file_directory_path() . '/subtheme/' . $name . '/images';
-    file_check_directory($directory, FILE_CREATE_DIRECTORY);
+// TODO test
+    $directory = file_build_uri("/subtheme/$name/images");
+    file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
     //Name the file.
     $file_path = $directory . "/" . $file->filename;
     // The image was saved using file_save_upload() and was added to the
@@ -218,7 +222,7 @@ function subtheme_save_files($form, &$form_state) {
  */
 function subtheme_remove_logo($subtheme) {
   $path = subtheme_images_path($subtheme); //Path to files dir or features module w files.
-  foreach (@file_scan_directory($path, '.*') as $file) {
+  foreach (@file_scan_directory($path, '/.*/') as $file) {
     // Add form items
     if ($file->name == 'logo') {
       if (!$result = file_delete($file->filename)) {
@@ -231,6 +235,8 @@ function subtheme_remove_logo($subtheme) {
 
 /**
  * Save new logo.
+ *
+ * TODO Handle this on validate and submit. See mtheme.
  */
 function subtheme_save_logo($form, &$form_state) {
   // Get parent (the form element that called this function)
@@ -244,7 +250,7 @@ function subtheme_save_logo($form, &$form_state) {
     $extension = $parts['extension'];
     // Check for file subtheme file directories. Create if needed.
     $directory = subtheme_images_path($subtheme);
-    file_check_directory($directory, FILE_CREATE_DIRECTORY);
+    file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
     // Name the file.
     $file_path = $directory . '/logo.' . $extension;
     // Save new subtheme logo.

@@ -4,28 +4,11 @@
  */
 
 /**
- * hook_install()
- *
- * set weight of this module to 10, so its submit function will run
- * after other modules modifying the subtheme form.
- */
-function subtheme_install() {
-  drupal_install_schema('subtheme');
-}
-
-/**
- * Implementation of hook_uninstall().
- */
-function subtheme_uninstall() {
-  drupal_uninstall_schema('subtheme');
-}
-
-/**
- * Implementation of hook_schema().
+ * Implements hook_schema().
  */
 function subtheme_schema() {
   $schema['subtheme_subtheme'] = array(
-    'description' => t('Table storing subtheme (myobj), definitions.'),
+    'description' => 'Table storing subtheme (myobj), definitions.',
     'export' => array(
       'key' => 'name',
       'key name' => 'Name',
@@ -45,7 +28,7 @@ function subtheme_schema() {
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'description' => t('Primary ID field for the table. Not used for anything except internal lookups.'),
+        'description' => 'Primary ID field for the table. Not used for anything except internal lookups.',
         'no export' => TRUE, // Do not export database-only keys.
       ),
       // name (machine, unique id)
@@ -54,7 +37,7 @@ function subtheme_schema() {
         'length' => 64,
         'not null' => TRUE,
         'default' => '',
-        'description' => t('Unique ID for this object. Used to identify it programmatically.'),
+        'description' => 'Unique ID for this object. Used to identify it programmatically.',
       ),
       // title (human readable)
       'title' => array(
@@ -62,7 +45,7 @@ function subtheme_schema() {
         'length' => 64,
         'not null' => TRUE,
         'default' => '',
-        'description' => t('Human readable title.'),
+        'description' => 'Human readable title.',
       ),
       // description
       'description' => array(
@@ -70,27 +53,26 @@ function subtheme_schema() {
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
-        'description' => t('Optional description of selector.'),
+        'description' => 'Optional description of selector.',
       ),
       'selectors' => array(
         'type' => 'text',
         'size' => 'big',
-        'description' => t('A serialized array of mtheme selectors included in each subtheme.'),
+        'description' => 'A serialized array of mtheme selectors included in each subtheme.',
         'serialize' => TRUE,
         'serialized default' => 'a:0:{}',
       ),
       'grps' => array(
         'type' => 'text',
         'size' => 'big',
-        'description' => t('A serialized array of groups, to organize selectors.'),
+        'description' => 'A serialized array of groups, to organize selectors.',
         'serialize' => TRUE,
         'serialized default' => 'a:0:{}',
       ),
       'custom_css' => array(
         'type' => 'text',
         'size' => 'big',
-        'description' => t('Custom CSS. These selectors are created by the end-user, '
-                          . 'they do not originate in a module theme.'),
+        'description' => 'Custom CSS. These selectors are created by the end-user, ',
         'not null' => TRUE,
         'default' => '',
       ),
@@ -98,7 +80,7 @@ function subtheme_schema() {
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'description' => t('0 not active. 1 active.'),
+        'description' => '0 not active. 1 active.',
       ),
     ),
     'primary key' => array('sid'),
@@ -111,21 +93,9 @@ function subtheme_schema() {
 }
 
 /**
- * Implementation of hook_update_N.
- *
- * Add custom_css field.
+ * Implements hook_update_N().
  */
+/*
 function subtheme_update_6001() {
-  $ret = array();
-  $table = 'subtheme_subtheme';
-  $field = 'custom_css';
-  $spec = array(
-    'type' => 'text',
-    'size' => 'big',
-    'description' => t('Custom CSS. These selectors are created by the end-user, '
-                      . 'they do not originate in a module theme.'),
-    'not null' => TRUE,
-    'default' => '',
-  );
-  db_add_field(&$ret, $table, $field, $spec, $new_keys);
 }
+// */

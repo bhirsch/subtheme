@@ -7,7 +7,7 @@
  */
 
 /**
- * Implementation of hook_help()
+ * Implements hook_help().
  */
 function subtheme_help($path, $arg) {
   if ($path == 'admin/help#subtheme') {
@@ -17,12 +17,12 @@ function subtheme_help($path, $arg) {
   }
 }
 /**
- * Implementation of hook_menu().
+ * Implements hook_menu().
  */
 function subtheme_menu() {
   $items = array();
 
-  $items['admin/build/subtheme/%/export'] = array(
+  $items['admin/structure/subtheme/%/export'] = array(
     'title' => 'export',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('subtheme_export_subtheme', 3),
@@ -30,7 +30,7 @@ function subtheme_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  $items['admin/build/subtheme/activate'] = array(
+  $items['admin/structure/subtheme/activate'] = array(
     'title' => t('Activate'),
     'description' => t('Activate selected subtheme'),
     'page callback' => 'drupal_get_form',
@@ -40,7 +40,7 @@ function subtheme_menu() {
     'file' => 'includes/subtheme.activate.inc',
     'weight' => 10,
   );
-  $items['admin/build/subtheme/edit/%'] = array(
+  $items['admin/structure/subtheme/edit/%'] = array(
     'title callback' => '_subtheme_title_customize_page',
     'description' => t('Customize Subtheme Styles'),
     'page callback' => 'drupal_get_form',
@@ -54,33 +54,46 @@ function subtheme_menu() {
 }
 
 /**
- * Implementation of hook_perm().
+ * Implements hook_permission().
  */
-function subtheme_perm() {
-  return array('administer subtheme', 'manage subtheme', 'subtheme export');
+function subtheme_permission() {
+  return array(
+    'administer subtheme' => array(
+      'title' => t('administer subtheme'),
+      'description' => t('TODO Add a description for \'administer subtheme\''),
+    ),
+    'manage subtheme' => array(
+      'title' => t('manage subtheme'),
+      'description' => t('TODO Add a description for \'manage subtheme\''),
+    ),
+    'subtheme export' => array(
+      'title' => t('subtheme export'),
+      'description' => t('TODO Add a description for \'subtheme export\''),
+    ),
+  );
 }
 
 /**
- * Implementation of hook_theme().
+ * Implements hook_theme().
  */
 function subtheme_theme() {
   return array(
     'subtheme_options_details' => array(
-      'arguments' => array('selector' => NULL),
+      'variables' => array('selector' => NULL),
     ),
     'subtheme_activate_options' => array(
-      'arguments' => array('subtheme' => NULL),
+      'variables' => array('subtheme' => NULL),
       'file' => 'includes/subtheme.activate.inc',
     ),
     'subtheme_activate' => array(
-      'arguments' => array('form' => NULL),
+      'render element' => 'form',
       'file' => 'includes/subtheme.activate.inc',
     ),
   );
 }
 
 /**
- * Implementation of hook_form_alter().
+ * Implements hook_form_alter().
  */
 function subtheme_form_alter(&$form, &$form_state, $form_id) {
   //dsm($form_id);
@@ -106,7 +119,8 @@ function subtheme_form_alter(&$form, &$form_state, $form_id) {
  * for an individual option in the list of options)
  * on the admin/build/subtheme/add and /edit forms.
  */
-function theme_subtheme_options_details($selector) {
+function theme_subtheme_options_details($variables) {
+  $selector = $variables['selector'];
   $path = drupal_get_path('module', 'subtheme') . '/subtheme.css';
   drupal_add_css($path);
 
@@ -233,7 +247,7 @@ function subtheme_admin_options_get() {
   // Show all mtheme selectors as options
   $options = array();
   foreach ($selectors as $selector) {
-    $details = theme('subtheme_options_details', $selector);
+    $details = theme('subtheme_options_details', array('selector' => $selector));
     $options[$selector->name] = $details;
   }
 
@@ -273,10 +287,12 @@ function subtheme_get_active_subtheme() {
 
 /**
  * Add subtheme css files.
+ * 
+ * TODO Replace this with hook_init()
  */
 function subtheme_add_css() {
   if ($path = subtheme_css_path($subtheme)) {
-    drupal_add_css($path, 'theme', 'all', TRUE);
+    drupal_add_css($path, array('type' => 'file', 'weight' => CSS_THEME));
   }
 }
 
@@ -367,7 +383,7 @@ function subtheme_set_logo($subtheme) {
  */
 function subtheme_get_logo($subtheme) {
   $path = subtheme_images_path($subtheme); //Path to files dir or features module w files.
-  foreach (@file_scan_directory($path, '.*') as $file) {
+  foreach (@file_scan_directory($path, '/.*/') as $file) {
     // Add form items
     if ($file->name == 'logo') {
       return $file->filename;
@@ -414,18 +430,18 @@ function subtheme_copy_files($subtheme, $original = NULL) {
 
   // Copy images.
   $new_images_path = subtheme_images_path($subtheme, 'files');
-  file_check_directory($new_images_path, FILE_CREATE_DIRECTORY);
+  file_prepare_directory($new_images_path, FILE_CREATE_DIRECTORY);
   if ($new) {
     // Check each mtheme_selector for images. Copy any we find.
     foreach ($images_paths as $images_path) {
-      foreach (@file_scan_directory($images_path, '.*') as $file) {
+      foreach (@file_scan_directory($images_path, '/.*/') as $file) {
         $file_path = $new_images_path . "/" . $file->basename;
         file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
       }
     }
   }
   else { // Subtheme is being cloned or overridden.
-    foreach (@file_scan_directory($images_path, '.*') as $file) {
+    foreach (@file_scan_directory($images_path, '/.*/') as $file) {
       $file_path = $new_images_path . "/" . $file->basename;
       file_copy($file->filename, $file_path, FILE_EXISTS_REPLACE);
     }
@@ -457,6 +473,9 @@ function subtheme_copy_files($subtheme, $original = NULL) {
  *
  * @return
  *  string, path/to/images/directory.
+ *
+ * TODO see mtheme_images path. Return relative path for CSS 
+ *  and URI for preparing directories.
  */
 function subtheme_images_path($subtheme, $status = FALSE) {
 
@@ -556,7 +575,7 @@ function subtheme_ctools_plugin_directory($module, $plugin) {
 }
 
 /**
- * Implementation of hook_ctools_plugin_api().
+ * Implements hook_ctools_plugin_api().
  *
  * Tell CTools that we support the default_mymodule_presets API.
  */
@@ -576,10 +595,11 @@ function subtheme_ctools_plugin_api($owner, $api) {
  * @param $name
  *  string, unique id for object
  */
-function subtheme_export_subtheme(&$form_state, $name) {
+function subtheme_export_subtheme($form, &$form_state, $name) {
   ctools_include('export');
   $obj = subtheme_subtheme_load($name);
-  drupal_set_title(check_plain($obj->description));
+  $title = check_plain($obj->description);
+  drupal_set_title($title);
   $code = subtheme_subtheme_export($obj);
   $lines = substr_count($code, "\n");
 
@@ -625,7 +645,7 @@ function subtheme_subtheme_save(&$myobj) {
 // Features hooks                                  /
 //-------------------------------------------------/
 /**
- * Implementation of hook_features_export().
+ * Implements hook_features_export().
  *
  * Component hook.
  *
@@ -655,10 +675,12 @@ function subtheme_subtheme_features_export($data, &$export, $module_name) {
 }
 
 /**
- * Implementation of hook_features_files().
+ * Implements hook_features_files().
  *
  * @todo This hook is provided by a patched version of
  * Features. See http://github.com/bhirsch/features.
+ * 
+ * TODO Update this for D7 hook.
  */
 function subtheme_features_files($export, $module_name) {
   $add_files = array();
@@ -668,17 +690,13 @@ function subtheme_features_files($export, $module_name) {
     foreach ($subtheme_subthemes as $name) {
       $subtheme_path = file_directory_path() . "/subtheme/$name";
       // Get subtheme's CSS file
-      //$add_files[$i]->name = $module_name .'.'. $name;
       $add_files[$i]->name = $name;
-      //$add_files[$i]->basename = $module_name .'.'. $name .'.css';
       $add_files[$i]->basename = $name . '.css';
-      //$add_files[$i]->filename = $subtheme_path ."/$name.css";
       $add_files[$i]->filename = $subtheme_path . "/$name.css";
-      //$add_files[$i]->subdir = "subtheme/$module_name.$name";
       $add_files[$i]->subdir = "subtheme/$name";
       // Check for images.
       $images_path = $subtheme_path . '/images';
-      foreach (@file_scan_directory($images_path, '.*') as $file) {
+      foreach (@file_scan_directory($images_path, '/.*/') as $file) {
         $i++;
         $add_files[$i]->name = $file->name;
         $add_files[$i]->basename = $file->basename;

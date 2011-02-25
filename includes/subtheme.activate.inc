@@ -6,7 +6,7 @@
 /**
  * Callback for admin/build/subtheme/activate.
  */
-function subtheme_activation_form() {
+function subtheme_activation_form($form, &$form_state) {
   $subthemes = subtheme_get_subthemes();
 
   $options = _subtheme_activate_options($subthemes);
@@ -34,7 +34,13 @@ function subtheme_activation_form() {
   return $form;
 }
 
-function theme_subtheme_activate($form) {
+/**
+ * Implement theme function for subtheme activate form.
+ * 
+ * Displays the form as a table with radio buttons and edit links.
+ */
+function theme_subtheme_activate($variables) {
+  $form = $variables['form'];
   $output = '';
   $output .= '<table>';
   $output .= '<tr>';
@@ -59,7 +65,7 @@ function theme_subtheme_activate($form) {
     //    $checked = ($name == 'red') ? 'checked="checked" ' : '';
     $checked = ($default == $name) ? 'checked="checked" ' : '';
     $description = t(check_plain($form['activate']['#options'][$name]->description));
-    $edit_link = ($name == 'disabled') ? '' : l(t('Edit'), "admin/build/subtheme/edit/$name");
+    $edit_link = ($name == 'disabled') ? '' : l(t('Edit'), "admin/structure/subtheme/edit/$name");
     $title = ($name == 'disabled') ? t('No active subtheme') : $title;
     $output .=   '<tr class="' . $zebra . '" >';
     $output .=     "<td>"
@@ -83,13 +89,16 @@ function theme_subtheme_activate($form) {
   $output .= '<input type="submit" class="form-submit" value="Save" id="edit-submit" name="op">';
   $output .= drupal_render($form['form_build_id']);
   $output .= drupal_render($form['form_token']);
-  $output .= drupal_render($form['form_id']);
+  // TODO Coder changed this from drupal_render() to drupal_render_children(). 
+  //   with drupal_render_children() do we still need the two preceeding 
+  //   drupal_render() functions?
+  $output .= drupal_render_children($form['form_id']);
 
   return $output;
 }
 
 /**
- * Implementation of hook_FORM_ID_submit().
+ * Implements hook_FORM_ID_submit().
  *
  * Activate selected subtheme.
  */
@@ -113,7 +122,11 @@ function _subtheme_activate_options($subthemes) {
   return $options;
 }
 
-function theme_subtheme_activate_options($subtheme) {
+/**
+ * Implement theme function for activate options. 
+ */
+function theme_subtheme_activate_options($variables) {
+  $subtheme = $variables['subtheme'];
 
   $output = '';
 

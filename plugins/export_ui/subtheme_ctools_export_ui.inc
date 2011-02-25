@@ -237,13 +237,17 @@ function subtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_sta
   }
 
   // delete image files
-  $path = file_directory_path() . "/subtheme/$name/images";
-  if (file_check_directory($path)) {
-    foreach (@file_scan_directory($path, '.*') as $file) {
-      file_delete($file->filename);
+  //$path = file_directory_path() . "/subtheme/$name/images";
+  $path = file_build_uri("subtheme/$name/images");
+  // Normalize $path for good measure.
+  $path = file_stream_wrapper_uri_normalize($path);
+  if (file_prepare_directory($path)) {
+    foreach (@file_scan_directory($path, '/.*/') as $file) {
+      //file_delete($file->filename);
+      file_unmanaged_delete($file->uri);
     }
   }
-  if (file_check_directory($path)) {
+  if (file_prepare_directory($path)) {
     $result = rmdir($path);
     if ($result) {
       $txt = $path . t(' deleted.');
@@ -255,10 +259,13 @@ function subtheme_ctools_export_ui_delete_confirm_form_submit(&$form, &$form_sta
   }
 
   // delete style sheet and subtheme directory
-  $path = file_directory_path() . "/subtheme/$name/$name.css";
-  file_delete($path);
+  //$path = file_directory_path() . "/subtheme/$name/$name.css";
+  $path = file_build_uri("subtheme/$name/$name.css");
+  // Normalize $path for good measure.
+  $path = file_stream_wrapper_uri_normalize($path);
+  file_unmanaged_delete($path);
   $path = file_directory_path() . "/subtheme/$name";
-  if (file_check_directory($path)) {
+  if (file_prepare_directory($path)) {
     $result = rmdir($path);
     if ($result) {
       $txt = $path . t(' deleted.');

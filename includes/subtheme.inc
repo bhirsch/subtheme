@@ -68,27 +68,29 @@ function subtheme_generate_css($subtheme) {
 function subtheme_write_css($css) {
   $file_contents = $css['css'];
   $name = $css['name'];
+
   // Make sure subtheme directory exists.
-  $file_path = file_directory_path() . "/subtheme";
+  $destination = file_build_uri('subtheme');
+  $destination = file_stream_wrapper_uri_normalize($destination);
   // If the directory doesn't exist, create it
   //$dir = file_check_directory(dirname($file_path), FILE_CREATE_DIRECTORY);
-  $dir = file_check_directory($file_path, FILE_CREATE_DIRECTORY);
+  $dir = file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
   if (!$dir) {
-    $txt = t('The function file_check_directory() failed. Please notify your system administrator.');
+    $txt = t('The function file_prepare_directory() failed. Please notify your system administrator.');
     drupal_set_message($txt, 'error');
   }
   // Set the location of the CSS file
-  $file_path = file_directory_path() . "/subtheme/$name/$name.css";
+  $destination = file_build_uri("/subtheme/$name/$name.css");
   // If the directory doesn't exist, create it
   //$dir = file_check_directory(dirname($file_path), FILE_CREATE_DIRECTORY);
-  $dir = file_check_directory(dirname($file_path), FILE_CREATE_DIRECTORY);
+  $dir = file_prepare_directory(drupal_dirname($destination), FILE_CREATE_DIRECTORY);
   if (!$dir) {
-    $txt = t('The function file_check_directory() failed. Please notify your system administrator.');
+    $txt = t('The function file_prepare_directory() failed. Please notify your system administrator.');
     drupal_set_message($txt, 'error');
   }
 
   // Create CSS file.
-  $saved = file_save_data($file_contents, $file_path, FILE_EXISTS_REPLACE);
+  $saved = file_save_data($file_contents, $destination, FILE_EXISTS_REPLACE);
   if (!$saved) {
     $txt = t('The function file_save_data() failed. Please notify your system administrator.');
     drupal_set_message($txt, 'error');
@@ -96,7 +98,7 @@ function subtheme_write_css($css) {
 
   // Notify user about new CSS
   $txt = t('New CSS file created: !file',
-          array('!file' => l($file_path, $file_path)));
+          array('!file' => l($destination, $destination)));
 
   drupal_set_message($txt);
 }

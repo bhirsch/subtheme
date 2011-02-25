@@ -2,6 +2,14 @@
 name = Subtheme
 description = GUI for creating a subtheme. 
 dependencies[] = "features"
-core = 6.x
+core = 7.x
 version = "6.x-1.0"
 project = "Subtheme"
+
+files[] = subtheme.install
+files[] = subtheme.module
+files[] = includes/subtheme.activate.inc
+files[] = includes/subtheme.edit.inc
+files[] = includes/subtheme.inc
+files[] = export_ui/subtheme_ctools_export_ui.inc
+files[] = export_ui/subtheme_export_ui.class.php
