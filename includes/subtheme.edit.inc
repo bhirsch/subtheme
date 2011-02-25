@@ -29,11 +29,12 @@ function subtheme_form($form, &$form_state) {
     '#collapsed' => TRUE,
   );
   // Prompt user to upload own graphic for main background here
-  $form['logo']['logo'] = array(
+  $form['logo']['logo_upload'] = array(
     '#type' => 'file',
     '#title' => t('Logo/Banner'),
     '#size' => 30,
-    '#element_validate' => array('subtheme_save_logo'),
+// TODO move this file handling to validate function.
+//    '#element_validate' => array('subtheme_save_logo'),
   );
   // Path to logo
   if ($logo_path = subtheme_get_logo($subtheme)) {
@@ -99,25 +100,23 @@ function subtheme_form($form, &$form_state) {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
-  $form['files']['file'] = array(
+  $form['files']['file_upload'] = array(
     '#type' => 'file',
     '#title' => t('Files'),
     '#size' => 30,
-    '#element_validate' => array('subtheme_save_files'),
   );
   // Check for available files
   $name = arg(4);
   $path = subtheme_images_path($subtheme); //Path to files dir or features module w files.
   $i = 0; // Use counter in case of conflicting $file->name values
   foreach (@file_scan_directory($path, '/.*/') as $file) {
-    $title = "images/$file->basename";
-    $link = l($title, $file->filename);
+    $title = "images/$file->filename";
+    $link = l($title, $file->uri);
     // Add form items
-    $item = $file->basename;
+    $item = $file->filename;
     $form['files'][$item] = array(
       '#type' => 'item',
-      '#title' => t("File ") . $i,
-      '#value' => $link,
+      '#title' => $link,
       '#description' => t("Add this file to your CSS like this: "
                          . "background: url('" . $title . "');"),
     );
@@ -137,7 +136,41 @@ function subtheme_form($form, &$form_state) {
 }
 
 /**
- * Implements hook_form_submit().
+ * Implements hook_FORM_ID_validate().
+ *
+ * Prepare uploaded files to be saved.
+ *
+ * TODO Move processing out of submit function and put here too.
+ */
+function subtheme_form_validate(&$form, &$form_state) {
+  // Handle file uploads.
+  // This is the validator used for uploading a theme logo.
+  $validators = array('file_validate_is_image' => array());
+  // These validators are used for uploading favicons. 
+  // @todo Would these validators be more appropriate here?
+  //$validators = array('file_validate_extensions' => array('ico png gif jpg jpeg apng svg'));
+
+  // Check for a new uploaded files.
+  $uploads = array('logo_upload', 'file_upload');
+  foreach ($uploads as $upload) {
+    $file = file_save_upload($upload, $validators);
+    if (isset($file)) {
+      // File upload was attempted.
+      if ($file) {
+        // Put the temporary file in form_values so we can save it on submit.
+        $form_state['values'][$upload] = $file;
+      }
+      else {
+        // File upload failed.
+        form_set_error('file_upload', t('The file could not be uploaded.'));
+        $form_state['values'][$upload] = FALSE; // TODO does this solve the undefined index error on submit? 
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_FORM_ID_submit().
  *
  * Process input in subtheme form, construct a new $subtheme object and save it.
  * (During subtheme_save(), CSS for the subtheme will be re-written).
@@ -166,7 +199,8 @@ function subtheme_form_submit(&$form, &$form_state) {
   $values = $form_state['values'];
   foreach ($values as $selector_name => $css_properties) {
     // Check for selector prefix.
-    if (substr($selector_name, 0, 9) == 'selector_') { // Check prefix to keep misc other $form['values'] out of $subtheme->selectors.
+    // Check prefix to keep misc other $form['values'] out of $subtheme->selectors.
+    if (substr($selector_name, 0, 9) == 'selector_') {
       $selector_name = substr($selector_name, 9);
       $subtheme->selectors[$selector_name]->css_properties = $css_properties;
     }
@@ -177,38 +211,40 @@ function subtheme_form_submit(&$form, &$form_state) {
   $subtheme->custom_css = $custom_css;
 
   subtheme_save($subtheme, $op);
-}
 
-/**
- * Save image files.
- *
- * Callback for #element_validate on
- * #files element of subtheme_form.
- *
- * TODO Replace this function with handling on validate and submit.
- *  See mtheme.
- */
-function subtheme_save_files($form, &$form_state) {
-  $name = arg(4);
-  // Get parent (the form element that called this function)
-  $parent = $form['#parents'][0];
-  // Check for a new uploaded file, and use that if available.
-  if ($file = file_save_upload($parent)) {
-    // Get file extension.
-    $parts = pathinfo($file->filename);
-    //$extension = $parts['extension'];
-    // Check for images file directory. Create if needed.
-// TODO test
-    $directory = file_build_uri("/subtheme/$name/images");
-    file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
-    //Name the file.
-    $file_path = $directory . "/" . $file->filename;
-    // The image was saved using file_save_upload() and was added to the
-    // files table as a temporary file. We'll make a copy and let the garbage
-    // collector delete the original upload.
-    file_copy($file, $file_path, FILE_EXISTS_REPLACE);
+  // Handle new file uploads. Do this after subtheme_save() in case
+  // a new file is being uploaded to override a default file.
+  // Otherwise subtheme_save() can move files over from a feature module
+  // when a subtheme is being newly overridden
+  // and blow away the newly uploaded files.
+  //
+  // If the user uploaded a new file, save it to a permanent location.
+  $uploads = array();
+  if (isset($values['file_upload'])) {
+    $uploads['file_upload'] = $values['file_upload'];
+    unset($values['file_upload']);
   }
-  return $form;
+  if (isset($values['logo_upload'])) {
+    $uploads['logo_upload'] = $values['logo_upload'];
+    unset($values['logo_upload']);
+  }
+  foreach ($uploads as $file) {
+    $source = $file->uri;
+    $destination = array();
+    // Save file to subtheme-specific directory here:
+    // files/subtheme/mysubtheme/images/imageX.jpg
+    $destination = subtheme_images_path($subtheme, 'files', 'uri');
+    if (!file_prepare_directory($destination, FILE_CREATE_DIRECTORY)) {
+      $txt = t("!destination could not be created.", 
+             array('!destination' => $destination));
+      drupal_set_message($txt);
+    }
+    if ($filename = file_unmanaged_copy($source, $destination, FILE_EXISTS_REPLACE)) {
+      $file_path = subtheme_images_path($subtheme, 'files', 'relative') . '/' . $file->filename;
+      $txt = t("New file saved: ") . l($file_path, $file_path);
+      drupal_set_message($txt);
+    }
+  }
 }
 
 /**
@@ -246,6 +282,7 @@ function subtheme_save_logo($form, &$form_state) {
     $subtheme = arg(4);
     subtheme_remove_logo($subtheme);
     // Get file extension.
+// TODO handle logo naming/handling.
     $parts = pathinfo($file->filename);
     $extension = $parts['extension'];
     // Check for file subtheme file directories. Create if needed.
