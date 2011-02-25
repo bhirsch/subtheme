@@ -153,11 +153,13 @@ function subtheme_form_validate(&$form, &$form_state) {
   // Check for a new uploaded files.
   $uploads = array('logo_upload', 'file_upload');
   foreach ($uploads as $upload) {
-    $file = file_save_upload($upload, $validators);
+    $file = file_save_upload($upload, $validators, FALSE, FILE_EXISTS_REPLACE);
     if (isset($file)) {
       // File upload was attempted.
       if ($file) {
         // Put the temporary file in form_values so we can save it on submit.
+//$info = image_get_info($file);
+//dsm($info);
         $form_state['values'][$upload] = $file;
       }
       else {
