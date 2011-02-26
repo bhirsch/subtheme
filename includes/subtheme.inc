@@ -40,8 +40,6 @@ function subtheme_generate_css($subtheme) {
   asort($groups);
   $group_comments = array();
   foreach ($groups as $selector_name => $group) {
-    // TODO Make sure this is working. Revised to handle undefined property error.
-    // if (!$group_comments[$group]) { // One group comment line per group please.
     if (empty($group_comments[$group])) { // One group comment line per group please.
       $css = _mtheme_group_comment($css, array('group_title' => $group)); // @todo move func to css module.
       $group_comments[$group] = TRUE;
