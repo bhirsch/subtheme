@@ -64,15 +64,15 @@ function subtheme_permission() {
   return array(
     'administer subtheme' => array(
       'title' => t('administer subtheme'),
-      'description' => t('TODO Add a description for \'administer subtheme\''),
+      'description' => t('Create new subthemes.'),
     ),
     'manage subtheme' => array(
       'title' => t('manage subtheme'),
-      'description' => t('TODO Add a description for \'manage subtheme\''),
+      'description' => t('Edit and activate existing subthemes.'),
     ),
     'subtheme export' => array(
       'title' => t('subtheme export'),
-      'description' => t('TODO Add a description for \'subtheme export\''),
+      'description' => t('Export subthemes.'),
     ),
   );
 }
@@ -420,7 +420,7 @@ function subtheme_activate($name) {
       // Activate selected subtheme.
       $subtheme->is_active = TRUE;
       subtheme_save($subtheme);
-// TODO move logo stuff into subtheme_save:w
+// TODO move logo stuff into subtheme_save
       subtheme_set_logo($subtheme);
     // Note: Use 'else if' next. Otherwise 'else' lets disabled subthemes slip in.
     }
@@ -569,9 +569,6 @@ function subtheme_copy_files($subtheme, $original = NULL) {
  *
  * @return
  *  string, path/to/images/directory.
- *
- * TODO see mtheme_images path. Return relative path for CSS 
- *  and URI for preparing directories.
  */
 function subtheme_images_path($subtheme, $status = FALSE, $type = 'relative') {
 
