@@ -367,17 +367,6 @@ function subtheme_get_active_subtheme($return = 'string') {
 }
 
 /**
- * Add subtheme css files.
- * 
- * TODO Replace this with hook_init()
- */
-function subtheme_add_css() {
-  if ($path = subtheme_css_path($subtheme)) {
-    drupal_add_css($path, array('type' => 'file', 'weight' => CSS_THEME));
-  }
-}
-
-/**
  * @param $name
  *  string, subtheme name
  *
