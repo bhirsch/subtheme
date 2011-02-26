@@ -139,9 +139,7 @@ function subtheme_ctools_export_ui_edit_item_form_validate(&$form, &$form_state)
     foreach ($selectors as $selector_name => $include) {
       if ($include) {
         $selector = mtheme_selector_load($selector_name);
-        //$selector->css_properties = "/******** uncomment to override default CSS properties ********* \n"
-        //                           .$selector->css_properties
-        //                           ."\n **************************************************************/";
+        unset($selector->disabled);
         $processed_selectors[$selector_name] = $selector;
         $processed_groups[$selector_name] = $selector->grp;
       }
