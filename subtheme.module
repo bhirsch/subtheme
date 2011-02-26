@@ -6,6 +6,10 @@
  * subtheme.module provides users a settings page for creating a subtheme.
  */
 
+//----------------------------------//
+// Drupal hooks                     //
+//----------------------------------//
+
 /**
  * Implements hook_help().
  */
@@ -141,10 +145,73 @@ function theme_subtheme_options_details($variables) {
   return $output;
 }
 
+/**
+ * Implements hook_init().
+ */
+function subtheme_init() {
+  $subtheme = subtheme_get_active_subtheme('object');
+  $stylesheet = subtheme_get_css($subtheme->name, 'relative');
+  $options = array(
+    'group' => CSS_THEME, 
+    'every_page' => TRUE, 
+    'weight' => 101, // Heavier than mtheme, which weighs 100.
+    'type' => 'file',
+  );
+  drupal_add_css($stylesheet, $options);
+}
+
 //-------------------------------------------//
 // Subtheme                                  //
 //-------------------------------------------//
 
+/**
+ * Get the path to mysubtheme.css.
+ * 
+ * @name 
+ *  String. Name of subtheme.
+ * 
+ * @param $type
+ *  (optional) String. Designate what type of path should be returned.
+ *  - 'relative' returns a path relative to Drupal's root directory.
+ *  - 'url' returns a URL.
+ * 
+ * @return $path
+ *  String. Relative or absolute path to stylesheet.
+ */
+function subtheme_get_css($name, $type = 'relative') {
+  // Get active subtheme.
+  if ($subtheme = subtheme_get_active_subtheme('object')) {
+    // It's not disabled and it's stored in code.
+    if (!$subtheme->disabled && $subtheme->in_code_only) {
+      // Get info about the features module that has the active subtheme.
+      $feature = subtheme_get_feature($name);
+      if ($feature->status == 1) { // Make sure feature is enabled.
+        $module_name = $feature->name;
+        $path = drupal_get_path('module', $module_name);
+        $stylesheet = $path . "/subtheme/$name/$name.css";
+      }
+    }
+    // If it's not disabled and it's not in code only, it's in the files directory.
+    else if (!$subtheme->disabled && !$subtheme->in_code_only) {
+      // This is the D7 equivalent of file_directory_path().
+      $public = new DrupalPublicStreamWrapper;
+      $files_directory = $public->getDirectoryPath();
+      // Load style sheet.
+      $stylesheet = $files_directory . "/subtheme/$name/$name.css";
+    }
+  }
+
+  // Build absolute URL.  
+  if ($type == 'url') {
+    $stylesheet = file_create_url($stylesheet);
+  }
+
+  return $stylesheet;
+}
+
+/**
+ * @return String. Page title for admin/structure/subtheme/edit/$name.
+ */
 function _subtheme_title_customize_page() {
   $name = arg(4);
   $title = t('Customize Style Sheet: ');
@@ -262,9 +329,13 @@ function subtheme_admin_options_get() {
 }
 
 /**
+ * @param $return
+ *  - 'string' (default), Return the name of the active subtheme as a string.
+ *  - 'object', Return the active subtheme object.
+ * 
  * @return string, active subtheme name. FALSE if no active subtheme.
  */
-function subtheme_get_active_subtheme() {
+function subtheme_get_active_subtheme($return = 'string') {
   // @todo Cache active subtheme rathe than load all active subthemes?
   $active_subtheme = FALSE;
   $subthemes = subtheme_get_subthemes();
@@ -287,8 +358,11 @@ function subtheme_get_active_subtheme() {
   if (!$active_subtheme) { // There is no active subtheme.
     return FALSE;
   }
-  else {
+
+  if ($return == 'string') {
     return $active_subtheme;
+  } else if ($return == 'object') {
+    return $subthemes[$active_subtheme]; 
   }
 }
 
@@ -552,34 +626,6 @@ function subtheme_images_path($subtheme, $status = FALSE, $type = 'relative') {
   }
 
   return $path;
-}
-
-/**
- * @return
- *  string, path to subtheme style sheet.
- */
-function subtheme_css_path($subtheme) {
-  // Get active subtheme.
-  if ($name = subtheme_get_active_subtheme()) {
-    $subtheme = subtheme_get($name);
-    // It's not disabled and it's stored in code.
-    if (!$subtheme->disabled && $subtheme->in_code_only) {
-      // Get info about the features module that has the active subtheme.
-      $feature = subtheme_get_feature($name);
-      if ($feature->status == 1) { // Make sure feature is enabled.
-        $module_name = $feature->name;
-        $path = drupal_get_path('module', $module_name);
-        $stylesheet = $path . "/subtheme/$module_name.$name/$module_name.$name.css";
-      }
-    }
-    // It's not disabled and it's not in code only.
-    else if (!$subtheme->disabled && !$subtheme->in_code_only) {
-      // Load style sheet.
-      $stylesheet = file_directory_path() . "/subtheme/$name/$name.css";
-    }
-  }
-
-  return $stylesheet;
 }
 
 /**

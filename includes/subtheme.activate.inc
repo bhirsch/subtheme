@@ -92,7 +92,8 @@ function theme_subtheme_activate($variables) {
   // TODO Coder changed this from drupal_render() to drupal_render_children(). 
   //   with drupal_render_children() do we still need the two preceeding 
   //   drupal_render() functions?
-  $output .= drupal_render_children($form['form_id']);
+  //$output .= drupal_render_children($form['form_id']);
+  $output .= drupal_render($form['form_id']);
 
   return $output;
 }

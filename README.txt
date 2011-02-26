@@ -20,19 +20,6 @@ Place the entire mtheme folder into your modules directory.
 Go to Administer -> Site building -> Modules and enable the Subtheme 
 module. 
 
-To "subtheme-enable" any theme on your site, copy and paste the following 
-snippet of code into the bottom of your theme(s) template.php file
-(below the last function in the file): 
-
-if (module_exists('mtheme') && module_exists('subtheme')) {
-  mtheme_add_css();  
-  subtheme_add_css();  
-}
-
-Note: If you have already included a similar code snippet in template.php 
-as instructed by Module Theme's README file, you can replace that snippet
-with this one.
-
 Recommended:
 Install a patched version of Features, available here:
 https://github.com/bhirsch/features
