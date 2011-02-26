@@ -776,19 +776,21 @@ function subtheme_features_files($export, $module_name) {
     // Get css files for each subtheme. (Multiple subthemes can be exported at once).
     $i = 0;
     foreach ($subtheme_subthemes as $name) {
-      $subtheme_path = file_directory_path() . "/subtheme/$name";
+      $public = new DrupalPublicStreamWrapper;
+      $files_directory = $public->getDirectoryPath();
+      $subtheme_path = $files_directory . "/subtheme/$name";
       // Get subtheme's CSS file
       $add_files[$i]->name = $name;
-      $add_files[$i]->basename = $name . '.css';
-      $add_files[$i]->filename = $subtheme_path . "/$name.css";
+      $add_files[$i]->filename = $name . '.css';
+      $add_files[$i]->uri = $subtheme_path . "/$name.css";
       $add_files[$i]->subdir = "subtheme/$name";
       // Check for images.
       $images_path = $subtheme_path . '/images';
       foreach (@file_scan_directory($images_path, '/.*/') as $file) {
         $i++;
         $add_files[$i]->name = $file->name;
-        $add_files[$i]->basename = $file->basename;
         $add_files[$i]->filename = $file->filename;
+        $add_files[$i]->uri = $file->uri;
         $add_files[$i]->subdir = "subtheme/$name/images";
       }
       $i++;
