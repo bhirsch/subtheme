@@ -75,6 +75,13 @@ function subtheme_schema() {
         'description' => 'Custom CSS. These selectors are created by the end-user, ',
         'not null' => TRUE,
       ),
+      'logo_path' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Logo path',
+      ),
       'is_active' => array(
         'type' => 'int',
         'unsigned' => TRUE,
@@ -93,8 +100,18 @@ function subtheme_schema() {
 
 /**
  * Implements hook_update_N().
+ *
+ * Add logo_path field.
  */
-/*
 function subtheme_update_6001() {
+  $table = 'subtheme_subtheme';
+  $field = 'logo_path';
+  $spec = array(
+    'type' => 'varchar',
+    'length' => 255,
+    'not null' => TRUE,
+    'default' => '',
+    'description' => 'Logo path',
+  );
+  db_add_field($table, $field, $spec, $keys_new = array());
 }
-// */

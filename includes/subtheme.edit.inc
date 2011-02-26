@@ -33,8 +33,6 @@ function subtheme_form($form, &$form_state) {
     '#type' => 'file',
     '#title' => t('Logo/Banner'),
     '#size' => 30,
-// TODO move this file handling to validate function.
-//    '#element_validate' => array('subtheme_save_logo'),
   );
   // Path to logo
   if ($logo_path = subtheme_get_logo($subtheme)) {
@@ -139,8 +137,6 @@ function subtheme_form($form, &$form_state) {
  * Implements hook_FORM_ID_validate().
  *
  * Prepare uploaded files to be saved.
- *
- * TODO Move processing out of submit function and put here too.
  */
 function subtheme_form_validate(&$form, &$form_state) {
   // Handle file uploads.
@@ -158,14 +154,12 @@ function subtheme_form_validate(&$form, &$form_state) {
       // File upload was attempted.
       if ($file) {
         // Put the temporary file in form_values so we can save it on submit.
-//$info = image_get_info($file);
-//dsm($info);
         $form_state['values'][$upload] = $file;
       }
       else {
         // File upload failed.
         form_set_error('file_upload', t('The file could not be uploaded.'));
-        $form_state['values'][$upload] = FALSE; // TODO does this solve the undefined index error on submit? 
+        $form_state['values'][$upload] = FALSE; 
       }
     }
   }
@@ -230,7 +224,7 @@ function subtheme_form_submit(&$form, &$form_state) {
     $uploads['logo_upload'] = $values['logo_upload'];
     unset($values['logo_upload']);
   }
-  foreach ($uploads as $file) {
+  foreach ($uploads as $key => $file) {
     $source = $file->uri;
     $destination = array();
     // Save file to subtheme-specific directory here:
@@ -245,6 +239,22 @@ function subtheme_form_submit(&$form, &$form_state) {
       $file_path = subtheme_images_path($subtheme, 'files', 'relative') . '/' . $file->filename;
       $txt = t("New file saved: ") . l($file_path, $file_path);
       drupal_set_message($txt);
+    }
+    if ($key == 'logo_upload') {
+      $logo_path = subtheme_images_path($subtheme, 'files', 'uri') . '/' . $file->filename;
+      // Store this path in subtheme table. 
+      db_merge('subtheme_subtheme')
+        ->fields(array('logo_path' => $logo_path))
+        ->condition('name', $subtheme->name)
+        ->execute();
+      // If this subtheme is active, update the logo.
+      $active_subtheme = subtheme_get_active_subtheme();
+      if ($subtheme->name == $active_subtheme) {
+        // Update $theme_settings['logo_path'] if subtheme is active.
+        $theme_settings = variable_get('theme_settings', NULL);
+        $theme_settings['logo_path'] = $logo_path;
+        variable_set('theme_settings', $theme_settings);
+      }
     }
   }
 }
@@ -269,41 +279,4 @@ function subtheme_remove_logo($subtheme) {
       }
     }
   }
-}
-
-/**
- * Save new logo.
- *
- * TODO Handle this on validate and submit. See mtheme.
- */
-function subtheme_save_logo($form, &$form_state) {
-  // Get parent (the form element that called this function)
-  $parent = $form['#parents'][0];
-  // Check for a new uploaded file, and use that if available.
-  if ($file = file_save_upload($parent)) {
-    $subtheme = arg(4);
-    subtheme_remove_logo($subtheme);
-    // Get file extension.
-// TODO handle logo naming/handling.
-    $parts = pathinfo($file->filename);
-    $extension = $parts['extension'];
-    // Check for file subtheme file directories. Create if needed.
-    $directory = subtheme_images_path($subtheme);
-    file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
-    // Name the file.
-    $file_path = $directory . '/logo.' . $extension;
-    // Save new subtheme logo.
-    if (file_copy($file, $file_path, FILE_EXISTS_REPLACE)) {
-      $txt = t('Your new logo has been saved.');
-      drupal_set_message($txt);
-      // If subtheme is active, update site logo.
-      if ($subtheme == subtheme_get_active_subtheme()) {
-        $settings = variable_get('theme_settings', NULL);
-        $settings['logo_path'] = $file_path;
-        variable_set('theme_settings', $settings);
-      }
-    }
-  }
-
-  return $form;
 }

@@ -357,8 +357,9 @@ function subtheme_activate($name) {
       // Activate selected subtheme.
       $subtheme->is_active = TRUE;
       subtheme_save($subtheme);
+// TODO move logo stuff into subtheme_save:w
       subtheme_set_logo($subtheme);
-      // Note: Use 'else if' next. 'else' lets disabled subthemes slip in.
+    // Note: Use 'else if' next. Otherwise 'else' lets disabled subthemes slip in.
     }
     else if ($subtheme->name == $name && $subtheme->is_active) {
       // Subtheme is already active. Make sure it's logo is set correctly.
@@ -371,6 +372,8 @@ function subtheme_activate($name) {
 /**
  * @param $subtheme
  *  object, subtheme object
+ *
+ * TODO UPDATE LOGO_PATH. THIS SHOULD PROBABLY ONLY REQUIRE SUBTHEME NAME.
  */
 function subtheme_set_logo($subtheme) {
   $logo_path = subtheme_get_logo($subtheme);
