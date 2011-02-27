@@ -116,7 +116,7 @@ function subtheme_schema() {
  * Add custom_css field.
  */
 function subtheme_update_6001() {
-  if (db_table_exists('subtheme_subtheme') {
+  if (db_table_exists('subtheme_subtheme')) {
     $ret = array();
     $table = 'subtheme_subtheme';
     $field = 'custom_css';
