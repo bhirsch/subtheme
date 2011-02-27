@@ -115,6 +115,7 @@ function subtheme_schema() {
  * 
  * Add custom_css field.
  */
+/*
 function subtheme_update_6001() {
   $ret = array();
   $table = 'subtheme_subtheme';
@@ -129,3 +130,4 @@ function subtheme_update_6001() {
   );
   db_add_field(&$ret, $table, $field, $spec, $new_keys);
 }
+// */
