@@ -116,16 +116,30 @@ function subtheme_schema() {
  * Add custom_css field.
  */
 function subtheme_update_6001() {
-  $ret = array();
-  $table = 'subtheme_subtheme';
-  $field = 'custom_css';
-  $spec = array(
-    'type' => 'text',
-    'size' => 'big',
-    'description' => t('Custom CSS. These selectors are created by the end-user, '
-                      .'they do not originate in a module theme.'),
-    'not null' => TRUE,
-    'default' => '',
-  );
-  db_add_field(&$ret, $table, $field, $spec, $new_keys);
+  if (db_table_exists('subtheme_subtheme') {
+    $ret = array();
+    $table = 'subtheme_subtheme';
+    $field = 'custom_css';
+    $spec = array(
+      'type' => 'text',
+      'size' => 'big',
+      'description' => t('Custom CSS. These selectors are created by the end-user, '
+                        .'they do not originate in a module theme.'),
+      'not null' => TRUE,
+      'default' => '',
+    );
+    db_add_field(&$ret, $table, $field, $spec, $new_keys);
+  }
+}
+
+/**
+ * Implementation of hook_update_N.
+ * 
+ * subtheme_update_6002: Create subtheme_subtheme table if it doesn't exist.
+ * This update is for sites running version 0 of the subtheme module.
+ */
+function subtheme_update_6002() {
+  if (!db_table_exists('subtheme_subtheme')) {
+    drupal_install_schema('subtheme');  
+  }  
 }
