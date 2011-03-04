@@ -1,7 +1,5 @@
-// $Id$
-
-Subtheme 
-----------
+Subtheme 7.x-1.x
+-----------------
 The Subtheme module enables you to: 
 - Create subthemes through Drupal's web interface
 - Export subthemes with the Features module
@@ -17,7 +15,7 @@ Module Theme
 Installation 
 ---------------
 Place the entire mtheme folder into your modules directory.
-Go to Administer -> Site building -> Modules and enable the Subtheme 
+Go to Administer -> Modules and enable the Subtheme 
 module. 
 
 Recommended:
@@ -38,7 +36,7 @@ Subtheme to build and export subthemes, read on.
 
 For Site Builders and Module Developers
 -----------------------------------------
-Go to Administer -> Site building -> Subtheme.
+Go to Administer -> Structure -> Subtheme.
 
 Here you will see a list of all the subthemes available to your site.
 
