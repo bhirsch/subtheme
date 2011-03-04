@@ -1,7 +1,5 @@
-// $Id$
-
-Subtheme 
-----------
+Subtheme 6.x-1.x
+------------------
 The Subtheme module enables you to: 
 - Create subthemes through Drupal's web interface
 - Export subthemes with the Features module
