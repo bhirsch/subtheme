@@ -150,14 +150,16 @@ function theme_subtheme_options_details($variables) {
  */
 function subtheme_init() {
   $subtheme = subtheme_get_active_subtheme('object');
-  $stylesheet = subtheme_get_css($subtheme->name, 'relative');
-  $options = array(
-    'group' => CSS_THEME, 
-    'every_page' => TRUE, 
-    'weight' => 101, // Heavier than mtheme, which weighs 100.
-    'type' => 'file',
-  );
-  drupal_add_css($stylesheet, $options);
+  if ($subtheme) {
+    $stylesheet = subtheme_get_css($subtheme->name, 'relative');
+    $options = array(
+      'group' => CSS_THEME, 
+      'every_page' => TRUE, 
+      'weight' => 101, // Heavier than mtheme, which weighs 100.
+      'type' => 'file',
+    );
+    drupal_add_css($stylesheet, $options);
+  }
 }
 
 //-------------------------------------------//

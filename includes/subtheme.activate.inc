@@ -54,7 +54,11 @@ function theme_subtheme_activate($variables) {
   $list = array();
   foreach ($form['activate']['#options'] as $name => $subtheme) {
     // Convert objects to arrays and sort for consistency.
-    $list[$name] = t(check_plain($subtheme->title));
+    if ($name != 'disabled') {
+      $list[$name] = t(check_plain($subtheme->title));
+    } else {
+      $list[$name] = '';  
+    }
   }
   asort($list);
   $default = $form['activate']['#default_value'];
@@ -64,7 +68,12 @@ function theme_subtheme_activate($variables) {
     $zebra = ($count % 2) ? 'odd' : 'even';
     //    $checked = ($name == 'red') ? 'checked="checked" ' : '';
     $checked = ($default == $name) ? 'checked="checked" ' : '';
-    $description = t(check_plain($form['activate']['#options'][$name]->description));
+    if (!empty($form['activate']['#options'][$name]->description)) {
+      $description = t(check_plain($form['activate']['#options'][$name]->description));
+    }  
+    else {
+      $description = '';
+    }
     $edit_link = ($name == 'disabled') ? '' : l(t('Edit'), "admin/structure/subtheme/edit/$name");
     $title = ($name == 'disabled') ? t('No active subtheme') : $title;
     $output .=   '<tr class="' . $zebra . '" >';
@@ -111,6 +120,9 @@ function subtheme_activation_form_submit(&$form, &$form_state) {
 function _subtheme_activate_options($subthemes) {
   $options = array();
   foreach ($subthemes as $subtheme) {
+    if (!property_exists($subtheme, 'disabled')) {
+      $subtheme->disabled = FALSE;
+    }
     if (!$subtheme->disabled) {
       $options[$subtheme->name] = $subtheme;
     }
