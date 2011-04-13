@@ -230,11 +230,13 @@ function subtheme_admin_options_get() {
   $selectors = mtheme_get_selectors(); 
 
   // Show all mtheme selectors as options
-  $options = array();
-  foreach ($selectors as $selector) {
-    $details = theme('subtheme_options_details', $selector);
-    $options[$selector->name] = $details;
-  }
+  if (!empty($selectors)) {
+    $options = array();
+    foreach ($selectors as $selector) {
+      $details = theme('subtheme_options_details', $selector);
+      $options[$selector->name] = $details;
+    }
+  } 
 
   return $options;
 }
